@@ -66,5 +66,5 @@ if __name__ == "__main__":
 			# Make sure to remove all the extra whitespace
 			row.append(wrapper.text.strip())
 
-		for r in table:
-			print(r)
+		# for r in table:
+		# 	print(r)

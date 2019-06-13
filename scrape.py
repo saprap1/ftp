@@ -34,28 +34,36 @@ if __name__ == "__main__":
 		nfl_table = soup.find("tbody")
 
 		# Number of categories of statistics (i.e. "team", "Att", "TD", etc)
-		num_cat = soup.find_all("th", {"class": "thd2"})
+		num_cat = len(soup.find_all("th", {"class": "thd2"}))
 
 		# Parse html of all the categories so we can add to list
+		###### THIS SKIPS THE "YDS" CATEGORY BECAUSE THAT HAS CLASS "thd2 order1 right sortable" ########
 		categories = soup.find_all("th", {"class": "thd2 right sortable"})
 
-		# Add all the different category headers to a list
-		cat_headers = []
+		# categories = soup.find_all("th", {"class": ["thd2 right sortable", "thd2 order1 right sortable"]})
+		# categories = soup.find_all("th", attrs={"class": "thd2 right sortable", "class":"thd2 order1 right sortable"})
+		# categories = soup.select("th.hd2 right sortable.thd2 order1 right sortable")
+
+		# Add all the different category headers to a list -- initialize with the standard categories that are for every position
+		cat_headers = ["Rk", "Player", "Team", "Pos"]
 		for item in categories:
 			cat_headers.append(item.find("a").text)
-		print(cat_headers)
+		# print(cat_headers)
+
+
 	
 		# Find all the players with their stats 
 		players = nfl_table.find_all("td")
 
 		count = 0					# Keep track of what's been printed so far
-		reset = len(num_cat)+1		# A reset value for count
+		reset = num_cat+1		# A reset value for count
 		num_players = len(players)
 
 		table = []					# maintain a table where...
 		row = []					#... each row contains all the data per player
 		
-		# Print each character with all the stats for that player
+
+		# Add each player with all the stats for that player
 		for wrapper in players:
 			count += 1
 			if count == reset:
@@ -66,5 +74,15 @@ if __name__ == "__main__":
 			# Make sure to remove all the extra whitespace
 			row.append(wrapper.text.strip())
 
-		# for r in table:
-		# 	print(r)
+		'''
+		# Print table
+		for r in table:
+			print(r)
+		'''
+
+		# Write to data.csv
+		with open('data.csv', 'w') as csv_file:
+			writer = csv.writer(csv_file)
+			writer.writerow(cat_headers)
+			for r in table:
+				writer.writerow(r)

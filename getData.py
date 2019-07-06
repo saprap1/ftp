@@ -5,9 +5,10 @@ import pandas as pd
 import re
 from bs4 import BeautifulSoup
 import requests
-import openpyxl
+# import openpyxl
 #import datetime
 import os
+import string
 
 
 from datetime import datetime
@@ -47,7 +48,7 @@ def getSheet(link_first, link_second, version, name, dist_feet, avg_speed, posts
                 if(y.string=="None"):
                     print(y.string)
                     continue
-                
+
             '''
             0 = game
             1 = date
@@ -62,6 +63,7 @@ def getSheet(link_first, link_second, version, name, dist_feet, avg_speed, posts
             25 = personal fouls
             26 = points
             '''
+
             stats_to_ints = [0, 10, 13, 16, 18, 19, 21, 24, 25, 26]
             date = 1
             minutes = 8
@@ -124,7 +126,9 @@ def getSheet(link_first, link_second, version, name, dist_feet, avg_speed, posts
     writer = pd.ExcelWriter(path)
     df.to_excel(writer,'Sheet1')
     writer.save()
-    
+
+
+
 def loadSportsVu(book, sheet, row_count, year):
     
     for i in range (2, row_count+1):
@@ -179,6 +183,33 @@ def loadSportsVu(book, sheet, row_count, year):
         getSheet(link_first, link_second, version, f, dist_feet, avg_speed, posts, drives, year, avg_min)
 
 
+# gets a list of the active players only under the given letter
+def getActivePlayers(letter):
+    url = "https://www.pro-football-reference.com/players/" + letter + "/"
+    a = requests.get(url)
+    soup = BeautifulSoup(a.text, 'lxml')
+    content = soup.find("div", {"class":"section_content"})
+    players = content.find_all("b")     # bolded name indicates active
+
+    player_names = []
+    player_url = []                 # this is what can be added to the URL to get the gamelog data for the player
+                                    # it's the first 4 letters of the last name concatendated with the first 2 letters of the first name
+    for wrapper in players:
+        p = wrapper.text            # this is the string "FIRST_NAME LAST_NAME (POS)"
+        p_content = p.split(" ")    # ["FIRST_NAME", "LAST_NAME", "(POS)"]
+        player_names.append(p_content)
+        # player_names.append(wrapper.text) 
+
+    for lst in player_names:
+        name = ""
+        name += lst[1][:4]  # first 4 letters of the last name
+        name += lst[0][:2]  # first 2 letters of the first name
+        player_url.append(name)
+        # print(name)
+
+    return player_url
+
+
 def main():
     #this would load a list of all NFL players and then make a call to scrape
     '''
@@ -189,11 +220,41 @@ def main():
     year = "2014"
     #loadSportsVu(book1, sheet1, row_count1, year)
     '''
+
+
+
+
+
+    # loop through each letter of the alphabet and get all the active players
+    # (I'm trying to think of a more efficient way to do this bc this is pretty slow, but... I don't think there is a better way)
+    letters = list(string.ascii_uppercase)
+    player_url = []
+    for l in letters:
+         player_url += getActivePlayers(l)
     
+
+    # list of all the URLS for the 2018 game logs for every currently active player in the NFL (according to pro football reference)
+    active_urls = []
+    for p in player_url:
+        u = "https://www.pro-football-reference.com/players/" + p[0] + "/" + p + "00/gamelog/2018/"
+        active_urls.append(u)
+
+    print(active_urls)
+
+
+
+
+
+
+
     #link = link_first + version + link_second
+    # link is always "https://www.pro-football-reference.com/players/" + <first letter last name> + "/" + <first 4 letters last name> + <first 2 letters first name> + "00/gamelog/" + <season> + "/"
     link = "https://www.pro-football-reference.com/players/B/BradTo00/gamelog/2018/"
+
+    # link = "https://www.pro-football-reference.com/players/B/BreeDr00/gamelog/2018/"
+
     a = requests.get(link)
-    #test of web scraping Tom Brady
+    # test of web scraping Tom Brady
     soup = BeautifulSoup(a.text, 'lxml')
 
     tb = soup.find("tbody")
@@ -211,7 +272,6 @@ def main():
             if(counter == 0):
                 if(y.string!="None"):
                     print(y.string)
-                    
     
     '''
     try:

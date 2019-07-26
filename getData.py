@@ -5,14 +5,11 @@ import pandas as pd
 import re
 from bs4 import BeautifulSoup
 import requests
-# import openpyxl
-#import datetime
+import openpyxl
 import os
 import string
 
-
 from datetime import datetime
-
 from datetime import timedelta 
 
 
@@ -185,8 +182,9 @@ def loadSportsVu(book, sheet, row_count, year):
 
 # gets a list of the active players only under the given letter
 def getActivePlayers(letter):
+
     url = "https://www.pro-football-reference.com/players/" + letter + "/"
-    a = requests.get(url)
+    a = requests.get(url)           # get all the players with last name starting with letter
     soup = BeautifulSoup(a.text, 'lxml')
     content = soup.find("div", {"class":"section_content"})
     players = content.find_all("b")     # bolded name indicates active
@@ -198,19 +196,17 @@ def getActivePlayers(letter):
         p = wrapper.text            # this is the string "FIRST_NAME LAST_NAME (POS)"
         p_content = p.split(" ")    # ["FIRST_NAME", "LAST_NAME", "(POS)"]
         player_names.append(p_content)
-        # player_names.append(wrapper.text) 
 
     for lst in player_names:
         name = ""
         name += lst[1][:4]  # first 4 letters of the last name
         name += lst[0][:2]  # first 2 letters of the first name
         player_url.append(name)
-        # print(name)
 
     return player_url
 
 
-def main():
+if __name__ == "__main__":
     #this would load a list of all NFL players and then make a call to scrape
     '''
     book1 = openpyxl.Workbook()
@@ -223,8 +219,6 @@ def main():
 
 
 
-
-
     # loop through each letter of the alphabet and get all the active players
     # (I'm trying to think of a more efficient way to do this bc this is pretty slow, but... I don't think there is a better way)
     letters = list(string.ascii_uppercase)
@@ -233,16 +227,18 @@ def main():
          player_url += getActivePlayers(l)
     
 
-    # list of all the URLS for the 2018 game logs for every currently active player in the NFL (according to pro football reference)
+    # list of all the URLS for the 2018 game logs for every currently ACTIVE player in the NFL (according to pro football reference)
     active_urls = []
     for p in player_url:
+        # construct URL and add to active_urls
         u = "https://www.pro-football-reference.com/players/" + p[0] + "/" + p + "00/gamelog/2018/"
         active_urls.append(u)
 
-    print(active_urls)
+    for u in active_urls:
+        print(u)
 
 
-
+    
 
 
 
@@ -252,9 +248,10 @@ def main():
     link = "https://www.pro-football-reference.com/players/B/BradTo00/gamelog/2018/"
 
     # link = "https://www.pro-football-reference.com/players/B/BreeDr00/gamelog/2018/"
+    # link = "https://www.pro-football-reference.com/players/T/TuraKe00/gamelog/2018/"
+
 
     a = requests.get(link)
-    # test of web scraping Tom Brady
     soup = BeautifulSoup(a.text, 'lxml')
 
     tb = soup.find("tbody")
@@ -262,17 +259,67 @@ def main():
     getW = soup.find('span', {'itemprop': 'weight'})
     weight = getW.text[0:3]
     print(weight)
+    print("---------------------------------------------------")
     labels = ["Date", "G#", "Cmp", "Att", "Cmp%", "Yds", "TD", "Int", "Rate", "Sk", "Yds", "Y/A", "AY/A", "Att", "Yds", "Y/A	TD", "Tgt", "	Rec", "Yds", "Y/R", "TD", "Ctch%", "Y/Tgt	TD", "Pts", "	Fmb", "FF	", "FR", "Yds", "TD"]
-    bigL = []
+    
+    bigL = [["a", "b", "c"], ["d", "e", "f", "g"]]
+    l = ["1", "2", "3", "4"]
+    
+
+    wb  = openpyxl.Workbook();
+    # wb = openpyxl.load_workbook(filename = 'data.xlsx')
+    dest_filename = 'data.xlsx'
+    ws1 = wb.active
+    ws1.title = "active players"
+
     for x in row:
         items = x.findAll("td")
         counter = 0
         L = []
+
+        append_row = []
+        # print(items)
+
+        # ws1.append(items)
         for y in items:
             if(counter == 0):
                 if(y.string!="None"):
                     print(y.string)
+                    append_row.append(y.text)
+
+        # append_row = append_row[1:]
+        ws1.append(append_row)
+        print("---------------------------------------------------")
+  
     
+    # wb = Workbook()
+    # ws = wb.active
+    # df = pd.DataFrame.from_records(bigL, columns=l)
+
+
+   
+
+
+    # for row in range(1, len(labels)):
+    #     # ws1.append(range(600))
+    #     # ws1.append(labels)
+    #     row = tb.findAll("tr")
+    #     items = x.findAll("td")
+    #     ws1.append(items)
+
+    # print(wb.get_sheet_names());
+
+    wb.save(filename = dest_filename)
+
+
+    # df = pd.DataFrame.from_records(bigL, columns=labels)
+    # filename = "data.xlsx"
+    # writer = pd.ExcelWriter(filename)
+    # df.to_excel(writer,'Sheet1')
+    # writer.save()
+    # df.to_excel("data.xlsx")    
+    
+
     '''
     try:
         row = tb.findAll("tr")
@@ -290,4 +337,4 @@ def main():
     print(name + " " + str(counting))
     labels = ['GM', 'Date', 'Weight', 'MP', 'FGA', '3PA', 'FTA', 'ORB', 'DRB', 'AST', 'TO', 'Fouls', 'PTS', 'dist_feet', 'avg_speed', "post_ups", "drives", "Injury"]
     '''
-main()
+# main()

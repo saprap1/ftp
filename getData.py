@@ -214,80 +214,51 @@ def loadPlayerWorkbook(name, link, wksht):
 '''
 
 # gets a list of the adjusted player names (first 4 letters of the last name)
-def getActivePlayers(letter):
+def get_active_2018_urls(letter):
 
     url = "https://www.pro-football-reference.com/players/" + letter + "/"
     a = requests.get(url)           # get all the players with last name starting with letter
     soup = BeautifulSoup(a.text, 'lxml')
     content = soup.find("div", {"class":"section_content"})
     players = content.find_all("b")     # bolded name indicates active
+   
+    # players now holds a list of the following info: <b><a href="url to the player's page">name</a>(position)</b>
+    # get the link for the webpage for the active players and add to gamelog_2018
+    gamelog_2018 = []
+    for p in players:
+        page = "https://www.pro-football-reference.com"
+        page += p.a["href"]
+        page += "/gamelog/2018"
+        gamelog_2018.append(page)
 
-    player_names = []
-    player_url = []                 # this is what can be added to the URL to get the gamelog data for the player
-                                    # it's the first 4 letters of the last name concatendated with the first 2 letters of the first name
-    for wrapper in players:
-        p = wrapper.text            # this is the string "FIRST_NAME LAST_NAME (POS)"
-        p_content = p.split(" ")    # ["FIRST_NAME", "LAST_NAME", "(POS)"]
-        player_names.append(p_content)
-
-    for lst in player_names:
-        name = ""
-        name += lst[1][:4]  # first 4 letters of the last name
-        name += lst[0][:2]  # first 2 letters of the first name
-        player_url.append(name)
-
-    return player_url
-
+    # maybe return a tuple with a list of names as well?
+    return gamelog_2018
 
 if __name__ == "__main__":
 
     wb = openpyxl.Workbook();
-    dest_filename = 'data.xlsx'
+    dest_filename = 'data_2018.xlsx'
     active_worksheet = wb.active
     active_worksheet.title = "active players"
-
 
     # loop through each letter of the alphabet and get all the active players
     # (I'm trying to think of a more efficient way to do this bc this is pretty slow, but... I don't think there is a better way)
     letters = list(string.ascii_uppercase)
-    player_url = []     # contains the first 4 letters of the last name
-    active_urls = []    # urls fo 2018 game logs for every active player in the NFL
+    active_urls_2018 = []    # urls fo 2018 game logs for every active player in the NFL
     
-
     for l in letters:
-         player_url += getActivePlayers(l)
-
-    # construct the URL and add to active_urls for each player
-    for p in player_url:
-        # link is always "https://www.pro-football-reference.com/players/" + <first letter last name> + "/" + <first 4 letters last name> + <first 2 letters first name> + "00/gamelog/" + <season> + "/"
-        u = "https://www.pro-football-reference.com/players/" + p[0] + "/" + p + "00/gamelog/2018/"
-        # loadPlayerWorkbook(p, u, active_worksheet)
-        active_urls.append(u)
-
-    '''
-    for u in active_urls:
-        print(u)
-    '''
+         active_urls_2018 += get_active_2018_urls(l)
     
-    # link = "https://www.pro-football-reference.com/players/B/BradTo00/gamelog/2018/"
-    # link = "https://www.pro-football-reference.com/players/B/BreeDr00/gamelog/2018/"
-    # link = "https://www.pro-football-reference.com/players/T/TuraKe00/gamelog/2018/"
-    # link = active_urls[3]
-    # print(link)
-
-
-
-    count = 0
-
     labels = ["Name", "Date", "G#", "Cmp", "Att", "Cmp%", "Yds", "TD", "Int", "Rate", "Sk", "Yds", "Y/A", "AY/A", "Att", "Yds", "Y/A    TD", "Tgt", "   Rec", "Yds", "Y/R", "TD", "Ctch%", "Y/Tgt   TD", "Pts", "   Fmb", "FF   ", "FR", "Yds", "TD"]
     active_worksheet.append(labels)
 
-    for link in active_urls:
+    count = 0;
+
+    for link in active_urls_2018:
         if count == 10:
             print("ending for testing purposes")
             break
 
-        # link = active_urls[i]
         a = requests.get(link)
         soup = BeautifulSoup(a.text, 'lxml')
 
@@ -295,8 +266,8 @@ if __name__ == "__main__":
             tb = soup.find("tbody")
             row = tb.findAll("tr")
         except:
-            # links in here go to players that aren't active. should have a 01 or 02 etc in the url instead of 00. 
-            # going to fix this at some point, for now, just skip
+            # Gets an error here bc the player page lied to me and indicated a player as active by bolding the font
+            # but the player's last active season is 2017, not 2018. We don't need this data, so we can skip it.
             print("ERROR with", link)
             count +=1
             continue;
@@ -305,7 +276,7 @@ if __name__ == "__main__":
         for x in row:
             items = x.findAll("td")
             counter = 0
-            L = []
+            # L = []
 
             append_row = [link]
 
@@ -314,11 +285,11 @@ if __name__ == "__main__":
                     if(y.string!="None"):
                         # print(y.string)
                         append_row.append(y.text)
+
             active_worksheet.append(append_row)
     
   
     wb.save(filename = dest_filename)
-
 
     '''
      # getW = soup.find('span', {'itemprop': 'weight'})

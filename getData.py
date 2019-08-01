@@ -242,12 +242,13 @@ if __name__ == "__main__":
     active_worksheet.title = "active players"
 
     # loop through each letter of the alphabet and get all the active players
-    # (I'm trying to think of a more efficient way to do this bc this is pretty slow, but... I don't think there is a better way)
+    # (I'm trying to think of a more efficient way to do this bc this is pretty slow,
+    # but... I don't think there is a better way)
     letters = list(string.ascii_uppercase)
     active_urls_2018 = []    # urls fo 2018 game logs for every active player in the NFL
     
     for l in letters:
-         active_urls_2018 += get_active_2018_urls(l)
+        active_urls_2018 += get_active_2018_urls(l)
     
     labels = ["Name", "Date", "G#", "Cmp", "Att", "Cmp%", "Yds", "TD", "Int", "Rate", "Sk", "Yds", "Y/A", "AY/A", "Att", "Yds", "Y/A    TD", "Tgt", "   Rec", "Yds", "Y/R", "TD", "Ctch%", "Y/Tgt   TD", "Pts", "   Fmb", "FF   ", "FR", "Yds", "TD"]
     active_worksheet.append(labels)
@@ -271,7 +272,6 @@ if __name__ == "__main__":
             print("ERROR with", link)
             count +=1
             continue;
-       
 
         for x in row:
             items = x.findAll("td")
@@ -287,8 +287,7 @@ if __name__ == "__main__":
                         append_row.append(y.text)
 
             active_worksheet.append(append_row)
-    
-  
+
     wb.save(filename = dest_filename)
 
     '''

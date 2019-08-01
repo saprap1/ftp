@@ -1,4 +1,4 @@
-# Fantasy Team Picker (FTP)
+## Fantasy Team Predictor (FTP)
 
 ### Overview
 The goal of this project is to train a machine learning algorithm to identify which players to draft at the beginning of the fantasy football season as well as which players to play on the team each week throughout the season. The training data is 2017 and 2018 gamelog data pulled from https://www.pro-football-reference.com.  

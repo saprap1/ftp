@@ -220,12 +220,24 @@ def get_active_2018_urls(letter):
     a = requests.get(url)           # get all the players with last name starting with letter
     soup = BeautifulSoup(a.text, 'lxml')
     content = soup.find("div", {"class":"section_content"})
-    players = content.find_all("b")     # bolded name indicates active
+    players_info = content.find_all("p")    # gets <p><b><a href="/players/Z/ZimmJu00.htm">Justin Zimmer</a> (DT)</b> 2018-2018</p>
+                                        # or <p><a href="/players/W/WisnJe20.htm">Jerry Wisne</a> (T) 1999-2002</p> (if not marked as active with <b>)
+    players_bold = []
+
+    for p in players_info:
+        p_split = p.text.split('-')
+        last_year_played = int(p_split[-1])
+        # Check if the player is marked as active and then validate it... might be able to get away with just the validation and not
+        # checking for the "b" flag
+        # p.b -- bolded name indicates active (<b><a href="/players/S/SaffRo20.htm">Rodger Saffold</a> (T)</b>)
+        if p.b != None:
+            if last_year_played == 2018:
+                players_bold.append(p.b)
    
-    # players now holds a list of the following info: <b><a href="url to the player's page">name</a>(position)</b>
+    # players_bold now holds a list of the following info: <b><a href="url to the player's page">name</a>(position)</b>
     # get the link for the webpage for the active players and add to gamelog_2018
     gamelog_2018 = []
-    for p in players:
+    for p in players_bold:
         page = "https://www.pro-football-reference.com"
         page += p.a["href"]
         page += "/gamelog/2018"
@@ -233,6 +245,8 @@ def get_active_2018_urls(letter):
 
     # maybe return a tuple with a list of names as well?
     return gamelog_2018
+
+
 
 if __name__ == "__main__":
 
@@ -245,22 +259,27 @@ if __name__ == "__main__":
     # (I'm trying to think of a more efficient way to do this bc this is pretty slow,
     # but... I don't think there is a better way)
     letters = list(string.ascii_uppercase)
-    active_urls_2018 = []    # urls fo 2018 game logs for every active player in the NFL
+    active_urls_2018 = []    # urls for 2018 game logs for every active player in the NFL
     
     for l in letters:
         active_urls_2018 += get_active_2018_urls(l)
+
+    # print(get_active_2018_urls("A"))
+
     
     labels = ["Name", "Date", "G#", "Cmp", "Att", "Cmp%", "Yds", "TD", "Int", "Rate", "Sk", "Yds", "Y/A", "AY/A", "Att", "Yds", "Y/A    TD", "Tgt", "   Rec", "Yds", "Y/R", "TD", "Ctch%", "Y/Tgt   TD", "Pts", "   Fmb", "FF   ", "FR", "Yds", "TD"]
     # active_worksheet.append(labels)
 
     count = 0;
 
+    
     for link in active_urls_2018:
-        active_worksheet.append(labels)
+        # active_worksheet.append(labels)
         # if count == 10:
         #     print("ending for testing purposes")
         #     break
 
+        print("trying...", link)
         a = requests.get(link)
         soup = BeautifulSoup(a.text, 'lxml')
 
@@ -290,8 +309,6 @@ if __name__ == "__main__":
             active_worksheet.append(append_row)
 
     wb.save(filename = dest_filename)
-
-    # There are 401 dead links for players who are bolded on the player page, but not actuall active in 2018
 
     '''
      # getW = soup.find('span', {'itemprop': 'weight'})

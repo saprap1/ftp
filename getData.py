@@ -251,14 +251,15 @@ if __name__ == "__main__":
         active_urls_2018 += get_active_2018_urls(l)
     
     labels = ["Name", "Date", "G#", "Cmp", "Att", "Cmp%", "Yds", "TD", "Int", "Rate", "Sk", "Yds", "Y/A", "AY/A", "Att", "Yds", "Y/A    TD", "Tgt", "   Rec", "Yds", "Y/R", "TD", "Ctch%", "Y/Tgt   TD", "Pts", "   Fmb", "FF   ", "FR", "Yds", "TD"]
-    active_worksheet.append(labels)
+    # active_worksheet.append(labels)
 
     count = 0;
 
     for link in active_urls_2018:
-        if count == 10:
-            print("ending for testing purposes")
-            break
+        active_worksheet.append(labels)
+        # if count == 10:
+        #     print("ending for testing purposes")
+        #     break
 
         a = requests.get(link)
         soup = BeautifulSoup(a.text, 'lxml')
@@ -269,7 +270,7 @@ if __name__ == "__main__":
         except:
             # Gets an error here bc the player page lied to me and indicated a player as active by bolding the font
             # but the player's last active season is 2017, not 2018. We don't need this data, so we can skip it.
-            print("ERROR with", link)
+            print(count, "ERROR with", link)
             count +=1
             continue;
 
@@ -289,6 +290,8 @@ if __name__ == "__main__":
             active_worksheet.append(append_row)
 
     wb.save(filename = dest_filename)
+
+    # There are 401 dead links for players who are bolded on the player page, but not actuall active in 2018
 
     '''
      # getW = soup.find('span', {'itemprop': 'weight'})

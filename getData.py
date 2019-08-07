@@ -249,6 +249,12 @@ def get_active_2018_urls(letter):
 
 
 if __name__ == "__main__":
+    
+    #loop through the position sheets and get name, then form the link based off of name and call from profootball reference
+    #player workbook formed
+    #in workbook calculate fantasy points
+    
+    #loop through each spreadsheet and do sliding window    
 
     wb = openpyxl.Workbook();
     dest_filename = 'data_2018.xlsx'

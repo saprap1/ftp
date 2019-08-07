@@ -37,8 +37,8 @@ def main():
 
     for i in range (2, row_count2+1):
 
-        if count == 10:
-            break
+        #if count == 10:
+         #   break
 
         wb = openpyxl.Workbook()
         # dest_filename = 'data_2018.xlsx'

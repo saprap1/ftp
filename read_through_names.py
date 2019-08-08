@@ -124,8 +124,27 @@ def main():
                 if(counter == 0):
                     if(y.string!="None"):
                         append_row.append(y.text)
+                        arr = y.text.split(" ")
+                        if position == "QB":
+                            #points calculation
+                            points = arr[13]/25 + arr[14]*4 + arr[15]*-2 + arr[22]/10 + arr[24]*6
+                        elif position == "TE":
+                            points = arr[12]/10 + arr[14]*6 + arr[19]*-2
+                        elif position == "WR":
+                            points = arr[12]/10 + arr[14]*6 + arr[18]/10 + arr[20]*6 + arr[23]*-2
+                        elif position == "RB":
+                            points = arr[11]/10 + arr[13]*6 + arr[16]/10 + arr[18]*6 + arr[23]*-2
+                        elif position == "K":
+                            #points calculation
+                            points = (arr[10]- (arr[11]-arr[10])) + (arr[13]*3 - (arr[14]-arr[13])) 
+                        else:
+                            #wr/te/rb calc
+                            points = 0
+                            
+                        
 
             sheet.append(append_row)
+            sheet.append([points])
 
         
         dest_filename = firstName + "_" + lastName + year + ".xlsx"

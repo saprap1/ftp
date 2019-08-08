@@ -76,7 +76,7 @@ def main():
             sheet = wb.active
         '''
     
-        if count == 10:
+        if count == 4:
            break
 
         s = sheet2.cell(row=i, column=1).value
@@ -120,31 +120,64 @@ def main():
             counter = 0
             append_row = [lastName, firstName, position]
 
+            # print(items)
+
             for y in items:
                 if(counter == 0):
                     if(y.string!="None"):
                         append_row.append(y.text)
-                        arr = y.text.split(" ")
-                        if position == "QB":
-                            #points calculation
-                            points = arr[13]/25 + arr[14]*4 + arr[15]*-2 + arr[22]/10 + arr[24]*6
-                        elif position == "TE":
-                            points = arr[12]/10 + arr[14]*6 + arr[19]*-2
-                        elif position == "WR":
-                            points = arr[12]/10 + arr[14]*6 + arr[18]/10 + arr[20]*6 + arr[23]*-2
-                        elif position == "RB":
-                            points = arr[11]/10 + arr[13]*6 + arr[16]/10 + arr[18]*6 + arr[23]*-2
-                        elif position == "K":
-                            #points calculation
-                            points = (arr[10]- (arr[11]-arr[10])) + (arr[13]*3 - (arr[14]-arr[13])) 
-                        else:
-                            #wr/te/rb calc
-                            points = 0
-                            
-                        
+            
+            '''
+            fantasy points calculation by position
+            Since items is a list of <td> tags, we can just get the text from that item in the list
 
+            Some players don't have *all* the data (if u look here:got here https://www.pro-football-reference.com/players/B/BarkMa00/gamelog/2018/
+                             you'll see that there is no 24th column)
+                    -- column names are not consistent for all players...
+
+            '''
+            # print(x)
+            if position == "QB":
+                yds_pass = float(items[13].text)
+                td_pass = float(items[14].text)
+                intercep = float(items[15].text)
+                rush_yds = float(items[22].text)
+                rush_td = float(items[24].text)
+                points = yds_pass/25 + td_pass*4 + intercep*-2 + rush_yds/10 + rush_td*6
+            elif position == "TE":
+                yds_rec = float(item[12].text)
+                td = float(items[14].text)
+                fmb = float(items[19].text)
+                points = yds_rec/10 + td*6 + fmb*-2
+            elif position == "WR":
+                rec_yds = float(items[12].text)
+                rec_td = float(items[14].text)
+                rush_yds = float(items[18].text)
+                rush_td = float(items[20].text)
+                fmb = float(items[23].text)
+                points = rec_yds/10 + rec_tc*6 + rush_yd/10 + rush_td*6 + fmb*-2
+            elif position == "RB":
+                rush_yds = float(items[11].text)
+                rush_td = float(items[13].text)
+                rec_yds = float(items[16].text)
+                rec_td = float(items[18].text)
+                fmb = float(items[23].text)
+                points = rush_yds/10 + rush_td*6 + rec_yds/10 + rec_td*6 + fmb*-2
+            elif position == "K":
+                #points calculation
+                xpm = float(item[10].text)
+                xpa = float(item[11].text)
+                fgm = float(item[13].text)
+                fga = float(item[14].text)
+                pts = float(item[17].text)
+                points = (xpm- (xpa-xpm)) + (fgm*3 - (fga-fgm)) 
+            else:
+                #wr/te/rb calc
+                points = 0
+                   
+            append_row.append(points)
             sheet.append(append_row)
-            sheet.append([points])
+            # sheet.append([points])
 
         
         dest_filename = firstName + "_" + lastName + year + ".xlsx"

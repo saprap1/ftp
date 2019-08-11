@@ -16,7 +16,7 @@ def try_link(linkfirst, version, linksecond, fullName):
     fantasy points calculation by position and returns the total calculated for each game
     Since items is a list of <td> tags, we can just get the text from that item in the list
 '''
-def calculatePoints(position, items):
+def calculate_points(position, items):
     points = 0
     try:
         if position == "QB":
@@ -31,7 +31,7 @@ def calculatePoints(position, items):
         elif position == "TE":
             # Is there a way to get the information by the attribute data-stat? that seems to be the only consistent thing among players
             # Works for: Rob Gronkowski
-            # Fails for: Delanie Walker (only 1 row, not fumbles), Eric Ebron (has an entire section for passing unlike gronk)
+            # Fails for: Delanie Walker (only 1 row, not fumbles), Eric Ebron (has an entire section for passing unlike gronk), Ed Dickson (doesn't even have fumbles)
             print(items)
             print('yds_rec', items[10].text, 'td', items[12].text, 'fmb', items[17].text)
             # print(items)
@@ -71,6 +71,38 @@ def calculatePoints(position, items):
     # print(points)
     return points
 
+
+# Get the fantasy points for this player
+def get_points(link_half, year):
+    link = link_half + "/fantasy/" + year
+    a = requests.get(link)
+    soup = BeautifulSoup(a.text, 'lxml')
+
+    ret_points = []
+
+    try:
+        tb = soup.find("tbody")
+        row = tb.findAll("tr")
+    except:
+        print("No fantasy log found for:", link)
+
+    for x in row:
+        items = x.findAll("td")
+        # fantasy points are under the FantPt column, which is always the 3rd to last column
+        try:
+            pts = float(items[-3].text)
+        except:
+            # in case the cell is empty, let's just put 0 there... though this might skew training data
+            pts = 0
+        ret_points.append(pts)
+
+    return ret_points
+
+
+
+
+
+
 def main():
     book2 = openpyxl.Workbook()
     book2 = openpyxl.load_workbook('all_players_2019.xlsx')
@@ -89,7 +121,7 @@ def main():
         sheet = wb.active
 
         #########debug stuff#############
-        if count == 1:
+        if count == 10:
            break
         #################################
 
@@ -116,13 +148,15 @@ def main():
         # firstName = "Eric"
         # lastName = "Ebron"
 
-        position = "TE"
+        # position = "TE"
         ###############################################################
 
         a = requests.get(link)
         soup = BeautifulSoup(a.text, 'lxml')
 
         # print("got here", link)
+        points = get_points("https://www.pro-football-reference.com/players/" + lastName[0] + "/" + lastName[:4] + firstName[:2] + "0" + str(version), year)
+        point_count = 0;
 
         try:
             tb = soup.find("tbody")
@@ -148,13 +182,16 @@ def main():
                     if(y.string!="None"):
                         append_row.append(y.text)
             
-            points = calculatePoints(position, items)    
-            append_row.append(points)
+            
+            append_row.append(points[point_count])
+            point_count += 1
             sheet.append(append_row)
 
         
         dest_filename = firstName + "_" + lastName + year + ".xlsx"
-        wb.save(filename = dest_filename)
+        dest_path = year + "_data/" + dest_filename
+        # wb.save(filename = dest_filename)
+        wb.save(dest_path)
 
         count +=1
         

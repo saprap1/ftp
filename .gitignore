@@ -1,3 +1,4 @@
 /.idea
 data.csv
 ~$data_2018.xlsx
+__pycache__

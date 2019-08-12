@@ -74,6 +74,9 @@ def calculate_points(position, items):
 
 # Get the fantasy points for this player
 def get_points(link_half, year):
+
+    #try griffin garret
+
     link = link_half + "/fantasy/" + year
     a = requests.get(link)
     soup = BeautifulSoup(a.text, 'lxml')
@@ -96,11 +99,9 @@ def get_points(link_half, year):
             pts = 0
         ret_points.append(pts)
 
+    # print(ret_points)
+
     return ret_points
-
-
-
-
 
 
 def main():
@@ -113,7 +114,8 @@ def main():
 
     # prev_position = sheet2.cell(row=2, column=2).value  
     
-    for i in range (2, row_count2+1):
+    # for i in range (2, row_count2+1):
+    for i in range (800, row_count2+1):
 
 
         position = sheet2.cell(row=i, column=2).value
@@ -121,8 +123,8 @@ def main():
         sheet = wb.active
 
         #########debug stuff#############
-        if count == 10:
-           break
+        # if count == 10:
+           # break
         #################################
 
         s = sheet2.cell(row=i, column=1).value
@@ -148,13 +150,18 @@ def main():
         # firstName = "Eric"
         # lastName = "Ebron"
 
+        # link = "https://www.pro-football-reference.com/players/G/GrifGa00/gamelog/2018"
+        # firstName = "Garret"
+        # lastName = "Griffin"
         # position = "TE"
         ###############################################################
 
         a = requests.get(link)
         soup = BeautifulSoup(a.text, 'lxml')
 
-        # print("got here", link)
+        print("got here", link)
+        points = []
+
         points = get_points("https://www.pro-football-reference.com/players/" + lastName[0] + "/" + lastName[:4] + firstName[:2] + "0" + str(version), year)
         point_count = 0;
 
@@ -182,8 +189,12 @@ def main():
                     if(y.string!="None"):
                         append_row.append(y.text)
             
-            
-            append_row.append(points[point_count])
+            try:
+                append_row.append(points[point_count])
+                # point_count += 1
+            except:
+                append_row.append(0)
+
             point_count += 1
             sheet.append(append_row)
 

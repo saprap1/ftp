@@ -75,7 +75,18 @@ def calculate_points(position, items):
 # Get the fantasy points for this player
 def get_points(link_half, year):
 
-    #try griffin garret
+    # It broke at https://www.pro-football-reference.com/players/S/SpenDi00/fantasy/2017 because no fantasy log exists
+    # Error: 
+    '''
+    Traceback (most recent call last):
+      File "read_through_names.py", line 204, in <module>
+        main()
+      File "read_through_names.py", line 160, in main
+        points = get_points("https://www.pro-football-reference.com/players/" + lastName[0] + "/" + lastName[:4] + firstName[:2] + "0" + str(version), year)
+      File "read_through_names.py", line 90, in get_points
+        for x in row:
+    UnboundLocalError: local variable 'row' referenced before assignment
+    '''
 
     link = link_half + "/fantasy/" + year
     a = requests.get(link)
@@ -99,8 +110,6 @@ def get_points(link_half, year):
             pts = 0
         ret_points.append(pts)
 
-    # print(ret_points)
-
     return ret_points
 
 
@@ -114,9 +123,7 @@ def main():
 
     # prev_position = sheet2.cell(row=2, column=2).value  
     
-    # for i in range (2, row_count2+1):
-    for i in range (800, row_count2+1):
-
+    for i in range (2, row_count2+1):
 
         position = sheet2.cell(row=i, column=2).value
         wb = openpyxl.Workbook()
@@ -132,7 +139,8 @@ def main():
         firstName = x[-1][1:]
         lastName = x[0]
         version = 0
-        year = "2018"
+        # year = "2018"
+        year = "2017"
         link = "https://www.pro-football-reference.com/players/" + lastName[0] + "/" + lastName[:4] + firstName[:2] + "0" + str(version) + "/gamelog/" + year + "/"
         #make soup request for data to formulate spreadsheet
         #open a spreadsheet, add fields, save it

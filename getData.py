@@ -5,17 +5,15 @@ import pandas as pd
 import re
 from bs4 import BeautifulSoup
 import requests
-# import openpyxl
-#import datetime
+import openpyxl
 import os
 import string
 
-
 from datetime import datetime
-
 from datetime import timedelta 
 
 
+#FROM HONORS PROJECT
 def getSheet(link_first, link_second, version, name, dist_feet, avg_speed, posts, drives, year, avg_min):
     link = link_first + version + link_second
     a = requests.get(link)
@@ -127,8 +125,7 @@ def getSheet(link_first, link_second, version, name, dist_feet, avg_speed, posts
     df.to_excel(writer,'Sheet1')
     writer.save()
 
-
-
+# FROM HONORS PROJECT
 def loadSportsVu(book, sheet, row_count, year):
     
     for i in range (2, row_count+1):
@@ -183,78 +180,12 @@ def loadSportsVu(book, sheet, row_count, year):
         getSheet(link_first, link_second, version, f, dist_feet, avg_speed, posts, drives, year, avg_min)
 
 
-# gets a list of the active players only under the given letter
-def getActivePlayers(letter):
-    url = "https://www.pro-football-reference.com/players/" + letter + "/"
-    a = requests.get(url)
-    soup = BeautifulSoup(a.text, 'lxml')
-    content = soup.find("div", {"class":"section_content"})
-    players = content.find_all("b")     # bolded name indicates active
-
-    player_names = []
-    player_url = []                 # this is what can be added to the URL to get the gamelog data for the player
-                                    # it's the first 4 letters of the last name concatendated with the first 2 letters of the first name
-    for wrapper in players:
-        p = wrapper.text            # this is the string "FIRST_NAME LAST_NAME (POS)"
-        p_content = p.split(" ")    # ["FIRST_NAME", "LAST_NAME", "(POS)"]
-        player_names.append(p_content)
-        # player_names.append(wrapper.text) 
-
-    for lst in player_names:
-        name = ""
-        name += lst[1][:4]  # first 4 letters of the last name
-        name += lst[0][:2]  # first 2 letters of the first name
-        player_url.append(name)
-        # print(name)
-
-    return player_url
-
-
-def main():
-    #this would load a list of all NFL players and then make a call to scrape
-    '''
-    book1 = openpyxl.Workbook()
-    book1 = openpyxl.load_workbook('2013-2014_combined_red.xlsx')
-    sheet1 = book1.get_sheet_by_name('Sheet1')   
-    row_count1 = sheet1.max_row
-    year = "2014"
-    #loadSportsVu(book1, sheet1, row_count1, year)
-    '''
-
-
-
-
-
-    # loop through each letter of the alphabet and get all the active players
-    # (I'm trying to think of a more efficient way to do this bc this is pretty slow, but... I don't think there is a better way)
-    letters = list(string.ascii_uppercase)
-    player_url = []
-    for l in letters:
-         player_url += getActivePlayers(l)
-    
-
-    # list of all the URLS for the 2018 game logs for every currently active player in the NFL (according to pro football reference)
-    active_urls = []
-    for p in player_url:
-        u = "https://www.pro-football-reference.com/players/" + p[0] + "/" + p + "00/gamelog/2018/"
-        active_urls.append(u)
-
-    print(active_urls)
-
-
-
-
-
-
-
-    #link = link_first + version + link_second
-    # link is always "https://www.pro-football-reference.com/players/" + <first letter last name> + "/" + <first 4 letters last name> + <first 2 letters first name> + "00/gamelog/" + <season> + "/"
-    link = "https://www.pro-football-reference.com/players/B/BradTo00/gamelog/2018/"
-
-    # link = "https://www.pro-football-reference.com/players/B/BreeDr00/gamelog/2018/"
-
+'''
+def loadPlayerWorkbook(name, link, wksht):
     a = requests.get(link)
-    # test of web scraping Tom Brady
+
+    print(link)
+
     soup = BeautifulSoup(a.text, 'lxml')
 
     tb = soup.find("tbody")
@@ -262,32 +193,132 @@ def main():
     getW = soup.find('span', {'itemprop': 'weight'})
     weight = getW.text[0:3]
     print(weight)
-    labels = ["Date", "G#", "Cmp", "Att", "Cmp%", "Yds", "TD", "Int", "Rate", "Sk", "Yds", "Y/A", "AY/A", "Att", "Yds", "Y/A	TD", "Tgt", "	Rec", "Yds", "Y/R", "TD", "Ctch%", "Y/Tgt	TD", "Pts", "	Fmb", "FF	", "FR", "Yds", "TD"]
-    bigL = []
+    labels = ["Name", "Date", "G#", "Cmp", "Att", "Cmp%", "Yds", "TD", "Int", "Rate", "Sk", "Yds", "Y/A", "AY/A", "Att", "Yds", "Y/A    TD", "Tgt", "   Rec", "Yds", "Y/R", "TD", "Ctch%", "Y/Tgt   TD", "Pts", "   Fmb", "FF   ", "FR", "Yds", "TD"]
+
+    active_worksheet.append(labels)
+
     for x in row:
         items = x.findAll("td")
         counter = 0
         L = []
+
+        append_row = [name]
+
         for y in items:
             if(counter == 0):
                 if(y.string!="None"):
                     print(y.string)
+                    append_row.append(y.text)
+        active_worksheet.append(append_row)
+        # print("---------------------------------------------------")
+'''
+
+# gets a list of the adjusted player names (first 4 letters of the last name)
+def get_active_2018_urls(letter):
+
+    url = "https://www.pro-football-reference.com/players/" + letter + "/"
+    a = requests.get(url)           # get all the players with last name starting with letter
+    soup = BeautifulSoup(a.text, 'lxml')
+    content = soup.find("div", {"class":"section_content"})
+    players_info = content.find_all("p")    # gets <p><b><a href="/players/Z/ZimmJu00.htm">Justin Zimmer</a> (DT)</b> 2018-2018</p>
+                                        # or <p><a href="/players/W/WisnJe20.htm">Jerry Wisne</a> (T) 1999-2002</p> (if not marked as active with <b>)
+    players_bold = []
+
+    for p in players_info:
+        p_split = p.text.split('-')
+        last_year_played = int(p_split[-1])
+        # Check if the player is marked as active and then validate it... might be able to get away with just the validation and not
+        # checking for the "b" flag
+        # p.b -- bolded name indicates active (<b><a href="/players/S/SaffRo20.htm">Rodger Saffold</a> (T)</b>)
+        if p.b != None:
+            if last_year_played == 2018:
+                players_bold.append(p.b)
+   
+    # players_bold now holds a list of the following info: <b><a href="url to the player's page">name</a>(position)</b>
+    # get the link for the webpage for the active players and add to gamelog_2018
+    gamelog_2018 = []
+    for p in players_bold:
+        page = "https://www.pro-football-reference.com"
+        page += p.a["href"]
+        page += "/gamelog/2018"
+        gamelog_2018.append(page)
+
+    # maybe return a tuple with a list of names as well?
+    return gamelog_2018
+
+
+
+if __name__ == "__main__":
     
+    #loop through the position sheets and get name, then form the link based off of name and call from profootball reference
+    #player workbook formed
+    #in workbook calculate fantasy points
+    
+    #loop through each spreadsheet and do sliding window    
+
+    wb = openpyxl.Workbook();
+    dest_filename = 'data_2018.xlsx'
+    active_worksheet = wb.active
+    active_worksheet.title = "active players"
+
+    # loop through each letter of the alphabet and get all the active players
+    # (I'm trying to think of a more efficient way to do this bc this is pretty slow,
+    # but... I don't think there is a better way)
+    letters = list(string.ascii_uppercase)
+    active_urls_2018 = []    # urls for 2018 game logs for every active player in the NFL
+    
+    for l in letters:
+        active_urls_2018 += get_active_2018_urls(l)
+
+    # print(get_active_2018_urls("A"))
+
+    
+    labels = ["Name", "Date", "G#", "Cmp", "Att", "Cmp%", "Yds", "TD", "Int", "Rate", "Sk", "Yds", "Y/A", "AY/A", "Att", "Yds", "Y/A    TD", "Tgt", "   Rec", "Yds", "Y/R", "TD", "Ctch%", "Y/Tgt   TD", "Pts", "   Fmb", "FF   ", "FR", "Yds", "TD"]
+    # active_worksheet.append(labels)
+
+    count = 0;
+
+    
+    for link in active_urls_2018:
+        # active_worksheet.append(labels)
+        # if count == 10:
+        #     print("ending for testing purposes")
+        #     break
+
+        print("trying...", link)
+        a = requests.get(link)
+        soup = BeautifulSoup(a.text, 'lxml')
+
+        try:
+            tb = soup.find("tbody")
+            row = tb.findAll("tr")
+        except:
+            # Gets an error here bc the player page lied to me and indicated a player as active by bolding the font
+            # but the player's last active season is 2017, not 2018. We don't need this data, so we can skip it.
+            print(count, "ERROR with", link)
+            count +=1
+            continue;
+
+        for x in row:
+            items = x.findAll("td")
+            counter = 0
+            # L = []
+
+            append_row = [link]
+
+            for y in items:
+                if(counter == 0):
+                    if(y.string!="None"):
+                        # print(y.string)
+                        append_row.append(y.text)
+
+            active_worksheet.append(append_row)
+
+    wb.save(filename = dest_filename)
+
     '''
-    try:
-        row = tb.findAll("tr")
-        getW = soup.find('span', {'itemprop': 'weight'})
-        weight = getW.text[0:3]
-    except:
-        v = int(version) + 1
-        version = "0" + str(v)
-        #print (link + " " + version)
-        getSheet(link_first, link_second, version, name, dist_feet, avg_speed, posts, drives, year, avg_min)
-        print(name)
-        return
-    global counting
-    counting += 1
-    print(name + " " + str(counting))
-    labels = ['GM', 'Date', 'Weight', 'MP', 'FGA', '3PA', 'FTA', 'ORB', 'DRB', 'AST', 'TO', 'Fouls', 'PTS', 'dist_feet', 'avg_speed', "post_ups", "drives", "Injury"]
+     # getW = soup.find('span', {'itemprop': 'weight'})
+        # weight = getW.text[0:3]
+        # print(weight)
+        # print("---------------------------------------------------")
     '''
-main()

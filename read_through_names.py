@@ -102,6 +102,7 @@ def get_points(link_half, year):
 
     for x in row:
         items = x.findAll("td")
+        
         # fantasy points are under the FantPt column, which is always the 3rd to last column
         try:
             pts = float(items[-3].text)
@@ -186,12 +187,23 @@ def main():
         
             print("skipping for " + firstName + " " + lastName + "...")
             continue
-
+        
+        features_wanted =  {'opp_name', 'pts', 'opp_pts', 'game_location','game_result','overtimes', 'wins','losses', 'date_game'}
+        qb_features = {}
+        rb_features = {}
         for x in row:
             items = x.findAll("td")
             counter = 0
             append_row = [lastName, firstName, position]
-
+            for f in features_wanted:
+                #basically calc points
+                try:
+                    stats = x.find("td", {'data-stat': f})
+                    print("game nummmmmmm ", items)
+                except:
+                    continue
+            
+            
             for y in items:
                 if(counter == 0):
                     if(y.string!="None"):

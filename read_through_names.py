@@ -189,8 +189,16 @@ def main():
             continue
         
         features_wanted =  {'opp_name', 'pts', 'opp_pts', 'game_location','game_result','overtimes', 'wins','losses', 'date_game'}
-        qb_features = {}
-        rb_features = {}
+
+
+        qb_features = {"pass_yds", "pass_td", "pass_int", "rush_yds", "rush_td"}
+        # can't find fumbles for running back
+        rb_features = {"rush_yds", "rush_td", "rec_yds", "rec_td"}
+
+        wr_features = {}
+        te_features = {}
+        k_features = {}
+        
         for x in row:
             items = x.findAll("td")
             counter = 0
@@ -199,7 +207,7 @@ def main():
                 #basically calc points
                 try:
                     stats = x.find("td", {'data-stat': f})
-                    print("game nummmmmmm ", items)
+                    print("game nummmmmmm ", stats)
                 except:
                     continue
             

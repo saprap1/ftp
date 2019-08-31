@@ -239,9 +239,11 @@ def main():
             # append_row = [lastName, firstName, position]
 
             # cherry-pick the exact "features" (data) that we want
+            #labels = []
             for f in features_wanted:
                 try:
                     stat = x.find("td", {'data-stat': f})
+                    #labels.append(f)
                     # print(stat)
                     data_dict[f].append(float(stat.text))
                     # print("here", f, stats.text)

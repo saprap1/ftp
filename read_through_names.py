@@ -127,11 +127,12 @@ def main():
 
     count = 0
 
-    for i in range (2, row_count2+1):
+    # for i in range (2, row_count2+1):
+    for i in range (822, row_count2+1):
 
         position = sheet2.cell(row=i, column=2).value
-        wb = openpyxl.Workbook()
-        sheet = wb.active        
+        # wb = openpyxl.Workbook()
+        # sheet = wb.active        
 
         s = sheet2.cell(row=i, column=1).value
         x = s.split(",")
@@ -140,8 +141,13 @@ def main():
         version = 0
         year = "2018"
         # year = "2017"
-        link = "https://www.pro-football-reference.com/players/" + lastName[0] + "/" + lastName[:4] + firstName[:2] + "0" + str(version) + "/gamelog/" + year + "/"
         
+        if firstName == "Derek" and lastName == "Carr":
+            version = 2
+            # print("here")
+        
+        link = "https://www.pro-football-reference.com/players/" + lastName[0] + "/" + lastName[:4] + firstName[:2] + "0" + str(version) + "/gamelog/" + year + "/"
+
         
         ########################more debug stuff#######################
         # link = "https://www.pro-football-reference.com/players/G/GronRo00/gamelog/2018/"
@@ -197,17 +203,17 @@ def main():
         ##########################
 
         # determine what features we want to focus on for each position
-        features_wanted = {}
+        features_wanted = []
         if position == "QB":
-            features_wanted = {"pass_yds", "pass_td", "pass_int", "rush_yds", "rush_td"}
+            features_wanted = ["pass_yds", "pass_td", "pass_int", "rush_yds", "rush_td"]
         elif position == "RB":
-            features_wanted = {"rush_yds", "rush_td", "rec_yds", "rec_td", "fumbles"}
+            features_wanted = ["rush_yds", "rush_td", "rec_yds", "rec_td", "fumbles"]
         elif position == "WR":
-            features_wanted = {"rec_yds", "rec_td", "rush_yds", "rush_td", "fumbles"}
+            features_wanted = ["rec_yds", "rec_td", "rush_yds", "rush_td", "fumbles"]
         elif position == "TE":
-            features_wanted = {"rec_yds", "rec_td", "fumbles"}
+            features_wanted = ["rec_yds", "rec_td", "fumbles"]
         elif position == "K":
-            features_wanted = {"xpm", "xpa", "fgm", "fga", "scoring"}
+            features_wanted = ["xpm", "xpa", "fgm", "fga", "scoring"]
         else:
             # skip the player if it's not one that is specified (can adjust this later on...)
             print("Invalid position (not QB, RB, WR, TE, K). Skipping:", position)
@@ -215,23 +221,23 @@ def main():
 
         # initialize all the keys in the dictionary
         # the dataframe will be constructed using the data held in the dictionary
-        # key: column name/category, value: list of the stats in the order of the games
-        data_dict = dict()
+        # key: column name/category, value: list of the stats in the order of the game
+        '''
+        put this info in the filename
         data_dict["last_name"] = []
         data_dict["first_name"] = []
         data_dict["position"] = []
-        for f in features_wanted:
-            data_dict[f] = []
-        data_dict["fantasy"] = []
+        '''
+        data = []
 
         # Trying to make a dictionary for each of the columns
         # for each row (game) in this player's gamelog...
         for x in row:
 
             # add data
-            data_dict["last_name"].append(lastName)
-            data_dict["first_name"].append(firstName)
-            data_dict["position"].append(position)
+            # data_dict["last_name"].append(lastName)
+            # data_dict["first_name"].append(firstName)
+            # data_dict["position"].append(position)
 
             # get all the data for that particular game
             # items = x.findAll("td")
@@ -240,27 +246,44 @@ def main():
 
             # cherry-pick the exact "features" (data) that we want
             #labels = []
+
+            data_append = []
+
             for f in features_wanted:
                 try:
                     stat = x.find("td", {'data-stat': f})
                     #labels.append(f)
                     # print(stat)
-                    data_dict[f].append(float(stat.text))
+                    data_append.append(float(stat.text))
                     # print("here", f, stats.text)
                 except:
-                    print("data-stat", f, "not found. Skipping this feature.")
+                    print("data-stat", f, "not found. Skipping this feature for", firstName, lastName)
+                    data_append.append(0.0)
                     continue
-            data_dict["fantasy"].append(float(fantasy_points[point_count]))
-            point_count += 1
+            try:
+                data_append.append(float(fantasy_points[point_count]))
+            except:
+                data_append.append(0.0)
 
+            data.append(data_append)
+            point_count += 1
+        print(i)
+
+        print(data)
         # create dataframe from the dictionary
-        df = pd.DataFrame.from_dict(data_dict)
+        features_wanted.append("fantasy points")
+        df = pd.DataFrame.from_records(data, columns=features_wanted)
         print(df)
 
+        dest_filename = firstName + "_" + lastName + "_" + position + "_" + year + ".xlsx"
+        dest_path = year + "_data/" + dest_filename
+
+        writer = pd.ExcelWriter(dest_path)
+        df.to_excel(writer, 'Sheet1')
+        writer.save()
 
         
-        # dest_filename = firstName + "_" + lastName + year + ".xlsx"
-        # dest_path = year + "_data/" + dest_filename
+        
         # wb.save(dest_path)
 
         # count +=1

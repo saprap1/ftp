@@ -6,6 +6,7 @@ Created on Wed Aug  7 10:57:56 2019
 @authors: Jay Messina, Priya Sapra
 """
 import openpyxl
+import os
 from bs4 import BeautifulSoup
 import requests
 import pandas as pd
@@ -273,7 +274,7 @@ def main():
         # create dataframe from the dictionary
         features_wanted.append("fantasy points")
         df = pd.DataFrame.from_records(data, columns=features_wanted)
-        print(df)
+        #print(df)
 
         dest_filename = firstName + "_" + lastName + "_" + position + "_" + year + ".xlsx"
         dest_path = year + "_data/" + dest_filename

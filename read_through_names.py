@@ -128,24 +128,19 @@ def main():
 
     count = 0
 
-    # for i in range (2, row_count2+1):
-    for i in range (822, row_count2+1):
+    for i in range (2, row_count2+1):
 
         position = sheet2.cell(row=i, column=2).value
-        # wb = openpyxl.Workbook()
-        # sheet = wb.active        
-
         s = sheet2.cell(row=i, column=1).value
         x = s.split(",")
         firstName = x[-1][1:]
         lastName = x[0]
         version = 0
-        year = "2018"
-        # year = "2017"
+        # year = "2018"
+        year = "2017"
         
         if firstName == "Derek" and lastName == "Carr":
             version = 2
-            # print("here")
         
         link = "https://www.pro-football-reference.com/players/" + lastName[0] + "/" + lastName[:4] + firstName[:2] + "0" + str(version) + "/gamelog/" + year + "/"
 
@@ -174,7 +169,6 @@ def main():
         a = requests.get(link)
         soup = BeautifulSoup(a.text, 'lxml')
 
-        # print("got here", link)
 
         # get ALL the fantasy points for this player in 1 soup request to the fantasy page
         # each entry is the fantasy points scored for that game
@@ -193,16 +187,6 @@ def main():
             print("skipping data collection for " + firstName + " " + lastName + "...")
             continue
         
-        ##########################
-        # features_wanted =  {'opp_name', 'pts', 'opp_pts', 'game_location','game_result','overtimes', 'wins','losses', 'date_game'}
-        # qb_features = {"pass_yds", "pass_td", "pass_int", "rush_yds", "rush_td"}
-        # # can't find fumbles for running back
-        # rb_features = {"rush_yds", "rush_td", "rec_yds", "rec_td"}
-        # wr_features = {"rec_yds", "rec_td", "rush_yds", "rush_td", "fumbles"}
-        # te_features = {"rec_yds", "rec_td", "fumbles"}
-        # k_features = {"xpm", "xpa", "fgm", "fga", "scoring"}
-        ##########################
-
         # determine what features we want to focus on for each position
         features_wanted = []
         if position == "QB":
@@ -220,43 +204,14 @@ def main():
             print("Invalid position (not QB, RB, WR, TE, K). Skipping:", position)
             continue
 
-        # initialize all the keys in the dictionary
-        # the dataframe will be constructed using the data held in the dictionary
-        # key: column name/category, value: list of the stats in the order of the game
-        '''
-        put this info in the filename
-        data_dict["last_name"] = []
-        data_dict["first_name"] = []
-        data_dict["position"] = []
-        '''
         data = []
-
-        # Trying to make a dictionary for each of the columns
-        # for each row (game) in this player's gamelog...
         for x in row:
-
-            # add data
-            # data_dict["last_name"].append(lastName)
-            # data_dict["first_name"].append(firstName)
-            # data_dict["position"].append(position)
-
-            # get all the data for that particular game
-            # items = x.findAll("td")
-            # counter = 0
-            # append_row = [lastName, firstName, position]
-
-            # cherry-pick the exact "features" (data) that we want
-            #labels = []
-
             data_append = []
 
             for f in features_wanted:
                 try:
                     stat = x.find("td", {'data-stat': f})
-                    #labels.append(f)
-                    # print(stat)
                     data_append.append(float(stat.text))
-                    # print("here", f, stats.text)
                 except:
                     print("data-stat", f, "not found. Skipping this feature for", firstName, lastName)
                     data_append.append(0.0)
@@ -271,10 +226,10 @@ def main():
         print(i)
 
         print(data)
-        # create dataframe from the dictionary
+        # create dataframe from the list
         features_wanted.append("fantasy points")
         df = pd.DataFrame.from_records(data, columns=features_wanted)
-        #print(df)
+
 
         dest_filename = firstName + "_" + lastName + "_" + position + "_" + year + ".xlsx"
         dest_path = year + "_data/" + dest_filename
@@ -283,10 +238,5 @@ def main():
         df.to_excel(writer, 'Sheet1')
         writer.save()
 
-        
-        
-        # wb.save(dest_path)
-
-        # count +=1
         
 main()

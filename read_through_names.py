@@ -3,14 +3,13 @@
 """
 Created on Wed Aug  7 10:57:56 2019
 
-@author: JayMessina
+@authors: Jay Messina, Priya Sapra
 """
 import openpyxl
+import os
 from bs4 import BeautifulSoup
 import requests
-
-def try_link(linkfirst, version, linksecond, fullName):
-    return
+import pandas as pd
 
 '''
     fantasy points calculation by position and returns the total calculated for each game
@@ -73,7 +72,7 @@ def calculate_points(position, items):
 
 
 # Get the fantasy points for this player
-def get_points(link_half, year):
+def get_fant_points(link_half, year):
 
     # It broke at https://www.pro-football-reference.com/players/S/SpenDi00/fantasy/2017 because no fantasy log exists
     # Error: 
@@ -102,6 +101,7 @@ def get_points(link_half, year):
 
     for x in row:
         items = x.findAll("td")
+        
         # fantasy points are under the FantPt column, which is always the 3rd to last column
         try:
             pts = float(items[-3].text)
@@ -113,6 +113,13 @@ def get_points(link_half, year):
     return ret_points
 
 
+
+'''
+- doesn't write dataframe into excel yet (have that stuff commented out rn)
+- currently set to run for 2018 only
+- have't tried running the whole thing entirely, so there might be bugs there (there's a thing with the arrays not being the same length...
+    i know you can fill those spots with something, but I can't figure that out)
+'''
 def main():
     book2 = openpyxl.Workbook()
     book2 = openpyxl.load_workbook('all_players_2019.xlsx')
@@ -121,19 +128,9 @@ def main():
 
     count = 0
 
-    # prev_position = sheet2.cell(row=2, column=2).value  
-    
     for i in range (2, row_count2+1):
 
         position = sheet2.cell(row=i, column=2).value
-        wb = openpyxl.Workbook()
-        sheet = wb.active
-
-        #########debug stuff#############
-        # if count == 10:
-           # break
-        #################################
-
         s = sheet2.cell(row=i, column=1).value
         x = s.split(",")
         firstName = x[-1][1:]
@@ -141,9 +138,12 @@ def main():
         version = 0
         # year = "2018"
         year = "2017"
+        
+        if firstName == "Derek" and lastName == "Carr":
+            version = 2
+        
         link = "https://www.pro-football-reference.com/players/" + lastName[0] + "/" + lastName[:4] + firstName[:2] + "0" + str(version) + "/gamelog/" + year + "/"
-        #make soup request for data to formulate spreadsheet
-        #open a spreadsheet, add fields, save it
+
         
         ########################more debug stuff#######################
         # link = "https://www.pro-football-reference.com/players/G/GronRo00/gamelog/2018/"
@@ -164,54 +164,79 @@ def main():
         # position = "TE"
         ###############################################################
 
+        #make soup request for data to formulate spreadsheet
+        #open a spreadsheet, add fields, save it
         a = requests.get(link)
         soup = BeautifulSoup(a.text, 'lxml')
 
-        print("got here", link)
-        points = []
 
-        points = get_points("https://www.pro-football-reference.com/players/" + lastName[0] + "/" + lastName[:4] + firstName[:2] + "0" + str(version), year)
-        point_count = 0;
+        # get ALL the fantasy points for this player in 1 soup request to the fantasy page
+        # each entry is the fantasy points scored for that game
+        fantasy_points = []
+        fantasy_points = get_fant_points("https://www.pro-football-reference.com/players/" + lastName[0] + "/" + lastName[:4] + firstName[:2] + "0" + str(version), year)
+        point_count = 0;    # pointer to current index of fantasy points
 
         try:
             tb = soup.find("tbody")
             row = tb.findAll("tr")
 
-            # print(row)
-
         except:
             # Here, need to handle 2 cases..
-            #   - either player is new and doesn't have 2018 data
+            #   - either player is new and doesn't have 2018/2017 data
             #   - or player has a different version # due to sharing a URL
+            print("skipping data collection for " + firstName + " " + lastName + "...")
+            continue
         
-            print("skipping for " + firstName + " " + lastName + "...")
+        # determine what features we want to focus on for each position
+        features_wanted = []
+        if position == "QB":
+            features_wanted = ["pass_yds", "pass_td", "pass_int", "rush_yds", "rush_td"]
+        elif position == "RB":
+            features_wanted = ["rush_yds", "rush_td", "rec_yds", "rec_td", "fumbles"]
+        elif position == "WR":
+            features_wanted = ["rec_yds", "rec_td", "rush_yds", "rush_td", "fumbles"]
+        elif position == "TE":
+            features_wanted = ["rec_yds", "rec_td", "fumbles"]
+        elif position == "K":
+            features_wanted = ["xpm", "xpa", "fgm", "fga", "scoring"]
+        else:
+            # skip the player if it's not one that is specified (can adjust this later on...)
+            print("Invalid position (not QB, RB, WR, TE, K). Skipping:", position)
             continue
 
+        data = []
         for x in row:
-            items = x.findAll("td")
-            counter = 0
-            append_row = [lastName, firstName, position]
+            data_append = []
 
-            for y in items:
-                if(counter == 0):
-                    if(y.string!="None"):
-                        append_row.append(y.text)
-            
+            for f in features_wanted:
+                try:
+                    stat = x.find("td", {'data-stat': f})
+                    data_append.append(float(stat.text))
+                except:
+                    print("data-stat", f, "not found. Skipping this feature for", firstName, lastName)
+                    data_append.append(0.0)
+                    continue
             try:
-                append_row.append(points[point_count])
-                # point_count += 1
+                data_append.append(float(fantasy_points[point_count]))
             except:
-                append_row.append(0)
+                data_append.append(0.0)
 
+            data.append(data_append)
             point_count += 1
-            sheet.append(append_row)
+        print(i)
 
-        
-        dest_filename = firstName + "_" + lastName + year + ".xlsx"
+        print(data)
+        # create dataframe from the list
+        features_wanted.append("fantasy points")
+        df = pd.DataFrame.from_records(data, columns=features_wanted)
+
+
+        dest_filename = firstName + "_" + lastName + "_" + position + "_" + year + ".xlsx"
         dest_path = year + "_data/" + dest_filename
-        # wb.save(filename = dest_filename)
-        wb.save(dest_path)
 
-        count +=1
+        writer = pd.ExcelWriter(dest_path)
+        df.to_excel(writer, 'Sheet1')
+        writer.save()
+
         
 main()

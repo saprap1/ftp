@@ -7,6 +7,9 @@ Some resources:
 train = 2017 data
 test = 2018 data
 
+# don't do 2017 as training and 2018 as testing because if there's a slight difference, could overtrain on this one thing
+# Maybe stick with 70% 30% (pretty standard) in each directory
+
 '''
 
 import openpyxl
@@ -17,42 +20,68 @@ import numpy as np
 import matplotlib.pyplot as plt
 import random
 
+def collect_data():
+    # for each player, call the helper function here
+    pass
+    
+
 # go through each of the files in that specific year, return X data and Y data
-def collect_data(year, position):
-    # start and end define our windows
-    start = 0
-    end = 0
+def collect_data_helper(year, position):
+    # define the sliding windowp
+    window = [0, 1, 2, 3]
     
-    # here, get all the players in the data folder, and check the position (need to keep all the X data separate)
+    X_return = []       # X values to get returned
+    X_collect = []      # Collect several games into one list
+    Y = []              # Fantasy points
+    isCollecting = True
+    
+    # testing on Tom Brady :|
     file = "2017_data/Tom_Brady_QB_2017.xlsx"
-    
     data = pd.read_excel(file, index_col=0)
+    games = data.values
+    num_games = len(games)
     
-    X_return = []
-    X_collect = []
-    
-    # for each file (player) -- gotta fix this
-    for i in range(0,1):
-        # for each row, get all the values
-        for game in data.drop(columns="fantasy points").values:
-            game = list(game)
-            # extend the current list
-            X_collect += game
-            # once we get data from 3 games into one row, add the data to the overall list
-            if end - start == 2:
-                start = (end+1)
-                X_return.append(X_collect)
-                # reset the row
-                X_collect = []
-            end += 1
-    return X_return
+    while isCollecting:
+        X_collect = []
+        for i in window:
+            one_game = list(games[i])
+            # end of windowv (fantasy points) goes to Y
+            if (i == window[-1]):
+                fp = one_game[-1]
+                Y.append(fp)
+            else:                
+                stats = one_game[:(len(one_game)-1)]
+                # extend X_collect
+                X_collect += stats
+        
+        # add the results from this window to the final X
+        X_return.append(X_collect)
+       # print(X_return)
+        #print(Y)
+        
+        # Move window up by 1
+        for i in range(0,len(window)):
+            window[i] += 1
+            
+        # No more games to check, exit loop
+        if window[-1] == num_games:
+            isCollecting = False
+        
+    return X_return, Y
     
 
 if __name__ == "__main__":
     file = "2017_data/Tom_Brady_QB_2017.xlsx"
     data = pd.read_excel(file, index_col=0)
     
-    X_qb = collect_data(2018, "QB")
+    X_qb, Y_qb = collect_data_helper(2018, "QB")
+    
+    # sanity check (X and Y should be the same length)
+    assert(len(X_qb) == len(Y_qb))
+    print(len(X_qb), len(Y_qb))
+    for i in range(0, len(X_qb)):
+        print("X", X_qb[i], "\nY", Y_qb[i])
+    
     '''
     data.plot(x='pass_yds', y='fantasy points', style='o')
     plt.show()

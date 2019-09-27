@@ -136,8 +136,8 @@ def main():
         firstName = x[-1][1:]
         lastName = x[0]
         version = 0
-        # year = "2018"
-        year = "2017"
+        year = "2018"
+        #year = "2017"
         
         if firstName == "Derek" and lastName == "Carr":
             version = 2

@@ -20,67 +20,146 @@ import numpy as np
 import matplotlib.pyplot as plt
 import random
 
-def collect_data():
-    # for each player, call the helper function here
-    pass
-    
-
 # go through each of the files in that specific year, return X data and Y data
-def collect_data_helper(year, position):
-    # define the sliding windowp
-    window = [0, 1, 2, 3]
+def collect_data(files):
+    
     
     X_return = []       # X values to get returned
     X_collect = []      # Collect several games into one list
     Y = []              # Fantasy points
-    isCollecting = True
     
     # testing on Tom Brady :|
-    file = "2017_data/Tom_Brady_QB_2017.xlsx"
-    data = pd.read_excel(file, index_col=0)
-    games = data.values
-    num_games = len(games)
+    #file = "2017_data/Tom_Brady_QB_2017.xlsx"
     
-    while isCollecting:
-        X_collect = []
-        for i in window:
-            one_game = list(games[i])
-            # end of windowv (fantasy points) goes to Y
-            if (i == window[-1]):
-                fp = one_game[-1]
-                Y.append(fp)
-            else:                
-                stats = one_game[:(len(one_game)-1)]
-                # extend X_collect
-                X_collect += stats
+    for file in files:
+        # define the sliding window
+        window = [0, 1, 2, 3]
+        data = pd.read_excel(file, index_col=0)
+        games = data.values
+        num_games = len(games)
         
-        # add the results from this window to the final X
-        X_return.append(X_collect)
-       # print(X_return)
-        #print(Y)
+        #print("reading...", file)
         
-        # Move window up by 1
-        for i in range(0,len(window)):
-            window[i] += 1
+        
+        #isCollecting = True
+        # gather all the data from this one file into X_return and Y
+        while True:
+            X_collect = []
             
-        # No more games to check, exit loop
-        if window[-1] == num_games:
-            isCollecting = False
-        
+            # No more games to check, exit loop
+            if window[-1] >= num_games:
+                #print("New X", X_return)
+                break;
+            
+            for i in window:
+                one_game = list(games[i])
+                # end of windowv (fantasy points) goes to Y
+                if (i == window[-1]):
+                    fp = one_game[-1]
+                    Y.append(fp)
+                else:                
+                    stats = one_game[:(len(one_game)-1)]
+                    # extend X_collect
+                    X_collect += stats
+            
+            # add the results from this window to the final X
+            X_return.append(X_collect)
+
+            # Move window up by 1
+            for i in range(0,len(window)):
+                window[i] += 1
+
     return X_return, Y
-    
+
+'''
+Takes in the year that we are going to look into and the lists for the filenames
+by position. We take in the lists so we can add to them and return them instead
+of making copies/trying to append sets of lists together/etc.
+'''
+def organize_players(year, qb_files, wr_files, rb_files, te_files):
+    directory_str = year + "_data/"
+    directory = os.fsencode(directory_str)
+    for file in os.listdir(directory):
+        filename = os.fsdecode(file)
+        # organize the files in the directory by the position that they're in
+        if "_QB_" in filename:
+            qb_files.append(directory_str + filename)
+        elif "_RB_" in filename:
+            rb_files.append(directory_str + filename)
+        elif "_WR_" in filename:
+            wr_files.append(directory_str + filename)
+        elif "_TE_" in filename:
+            te_files.append(directory_str + filename)
+            
+    return qb_files, wr_files, rb_files, te_files
+
+def split_data(files, training, testing):
+    # for each player, call the helper function here
+    train = (len(files)*7)//10   # get 70 percent of players
+    # add the training set
+    training += files[:train]
+    # add the testing set
+    testing += files[train:]
+    return training, testing
 
 if __name__ == "__main__":
-    file = "2017_data/Tom_Brady_QB_2017.xlsx"
-    data = pd.read_excel(file, index_col=0)
     
-    X_qb, Y_qb = collect_data_helper(2018, "QB")
+    # need to initialize these because they are added to in the functions
+    qb_files = []
+    wr_files = []
+    rb_files = []
+    te_files = []
     
-    # sanity check (X and Y should be the same length)
-    assert(len(X_qb) == len(Y_qb))
-    print(len(X_qb), len(Y_qb))
-    for i in range(0, len(X_qb)):
-        print("X", X_qb[i], "\nY", Y_qb[i])
+    qb_train = []
+    qb_test = []
+    wr_train = []
+    wr_test = []
+    rb_train = []
+    rb_test = []
+    te_train = []
+    te_test = []
+    
+    
+    # get all the 2017 files
+    qb_files, wr_files, rb_files, te_files = organize_players("2017", qb_files, wr_files, rb_files, te_files)
+    qb_train, qb_test = split_data(qb_files, qb_train, qb_test)
+    wr_train, wr_test = split_data(wr_files, wr_train, wr_test)
+    rb_train, rb_test = split_data(rb_files, rb_train, rb_test)
+    te_train, te_test = split_data(te_files, te_train, te_test)
+    
+    # get all the 2018 files
+    qb_files, wr_files, rb_files, te_files = organize_players("2018", qb_files, wr_files, rb_files, te_files)
+    qb_train, qb_test = split_data(qb_files, qb_train, qb_test)
+    wr_train, wr_test = split_data(wr_files, wr_train, wr_test)
+    rb_train, rb_test = split_data(rb_files, rb_train, rb_test)
+    te_train, te_test = split_data(te_files, te_train, te_test)
+    
+    #print(qb_files)
+    #print(wr_files)
+    #print(rb_files)
+    #print(te_files)
+    
+    # 70% of data goes to X_train and Y_train
+    # 30% of data goes to X_test and Y_test
+    #print(len(qb_train), qb_train)
+    #print(len(qb_test), qb_test)
+    qb_X_train, qb_Y_train = collect_data(qb_train)
+    qb_X_test, qb_Y_test = collect_data(qb_test)
+    wr_X_train, wr_Y_train = collect_data(wr_train)
+    wr_X_test, wr_Y_test = collect_data(wr_test)
+    rb_X_train, rb_Y_train = collect_data(rb_train)
+    rb_X_test, rb_Y_test = collect_data(rb_test)
+    te_X_train, te_Y_train = collect_data(te_train)
+    te_X_test, te_Y_test = collect_data(te_test)
+    
+    # Sanity check to make sure all the training sets are the same length and all the testing sets are the same length!
+    print("QB Train", len(qb_X_train), len(qb_Y_train), "QB Test", len(qb_X_test), len(qb_Y_test))
+    print("WR Train", len(wr_X_train), len(wr_Y_train), "WR Test", len(wr_X_test), len(wr_Y_test))
+    print("RB Train", len(rb_X_train), len(rb_Y_train), "RB Test", len(rb_X_test), len(rb_Y_test))
+    print("TE Train", len(te_X_train), len(te_Y_train), "TE Test", len(te_X_test), len(te_Y_test))
+    #print(len(qb_X_test), qb_X_test)
+    #print(len(qb_Y_train), qb_Y_train)
+    #print(len(qb_Y_test), qb_Y_test)
     
     '''
     data.plot(x='pass_yds', y='fantasy points', style='o')

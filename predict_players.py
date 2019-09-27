@@ -20,6 +20,19 @@ import numpy as np
 import matplotlib.pyplot as plt
 import random
 
+from sklearn import model_selection
+from sklearn.metrics import roc_auc_score, auc, roc_curve
+from sklearn.metrics import classification_report
+from sklearn.metrics import confusion_matrix
+from sklearn.metrics import accuracy_score
+from sklearn.linear_model import LogisticRegression
+from sklearn.tree import DecisionTreeClassifier
+from sklearn.neighbors import KNeighborsClassifier
+from sklearn.discriminant_analysis import LinearDiscriminantAnalysis
+from sklearn.naive_bayes import GaussianNB
+from sklearn.svm import SVC
+from sklearn.ensemble import RandomForestClassifier
+
 # go through each of the files in that specific year, return X data and Y data
 def collect_data(files):
     
@@ -160,6 +173,39 @@ if __name__ == "__main__":
     #print(len(qb_X_test), qb_X_test)
     #print(len(qb_Y_train), qb_Y_train)
     #print(len(qb_Y_test), qb_Y_test)
+    
+    
+    #new ML prediction code
+    # getting error for "continuous value" - I think a type is off in data
+    #ValueError: Unknown label type: 'continuous'
+    rf = RandomForestClassifier(n_estimators=100)
+    '''
+    print("QB X Train")
+    print(qb_X_train)
+    print()
+    print("QB Y Train")
+    print(qb_Y_train)
+    '''
+    
+    rf.fit(qb_X_train, qb_Y_train)
+    print("fit data complete")
+    predictions = rf.predict(qb_X_test) 
+    print("predictions complete")
+    #print(predictions)
+    y_predict_probabilities = rf.predict_proba(qb_X_test)[:,1]
+    print(y_predict_probabilities)
+    
+    
+    #print all results
+    print(accuracy_score(qb_Y_test, predictions))
+    print(confusion_matrix(qb_Y_test, predictions))
+    print(classification_report(qb_Y_test, predictions))
+    
+    '''
+    This link to do calculations: https://www.dataquest.io/blog/machine-learning-tutorial/
+    go to sci-kit learn part near bottom
+    
+    '''
     
     '''
     data.plot(x='pass_yds', y='fantasy points', style='o')

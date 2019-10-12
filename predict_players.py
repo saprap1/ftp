@@ -32,6 +32,8 @@ from sklearn.discriminant_analysis import LinearDiscriminantAnalysis
 from sklearn.naive_bayes import GaussianNB
 from sklearn.svm import SVC
 from sklearn.ensemble import RandomForestClassifier
+from sklearn import datasets, linear_model
+from sklearn.metrics import mean_squared_error, r2_score
 
 # go through each of the files in that specific year, return X data and Y data
 def collect_data(files):
@@ -175,10 +177,26 @@ if __name__ == "__main__":
     #print(len(qb_Y_test), qb_Y_test)
     
     
+    qb_model = linear_model.LinearRegression()
+    
+    qb_model.fit(qb_X_train, qb_Y_train)
+    qb_Y_pred = qb_model.predict(qb_X_test)
+    
+    # The mean squared error
+    print("Mean squared error: %.2f"
+          % mean_squared_error(qb_Y_test, qb_Y_pred))
+    # Explained variance score: 1 is perfect prediction
+    print('Variance score: %.2f' % r2_score(qb_Y_test, qb_Y_pred))
+        
+    
     #new ML prediction code
     # getting error for "continuous value" - I think a type is off in data
     #ValueError: Unknown label type: 'continuous'
-    rf = RandomForestClassifier(n_estimators=100)
+    
+    # i think this has to do with the fact that we can't really use classifiers
+    # to predict the number of points a player will get
+    
+    #rf = RandomForestClassifier(n_estimators=100)
     '''
     print("QB X Train")
     print(qb_X_train)
@@ -186,7 +204,7 @@ if __name__ == "__main__":
     print("QB Y Train")
     print(qb_Y_train)
     '''
-    
+    '''
     rf.fit(qb_X_train, qb_Y_train)
     print("fit data complete")
     predictions = rf.predict(qb_X_test) 
@@ -200,6 +218,7 @@ if __name__ == "__main__":
     print(accuracy_score(qb_Y_test, predictions))
     print(confusion_matrix(qb_Y_test, predictions))
     print(classification_report(qb_Y_test, predictions))
+    '''
     
     '''
     This link to do calculations: https://www.dataquest.io/blog/machine-learning-tutorial/

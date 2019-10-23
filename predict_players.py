@@ -3,13 +3,7 @@
 '''
 Some resources:
     https://towardsdatascience.com/a-beginners-guide-to-linear-regression-in-python-with-scikit-learn-83a8f7ae2b4f
-
-train = 2017 data
-test = 2018 data
-
-# don't do 2017 as training and 2018 as testing because if there's a slight difference, could overtrain on this one thing
-# Maybe stick with 70% 30% (pretty standard) in each directory
-
+    This link to do calculations: https://www.dataquest.io/blog/machine-learning-tutorial/
 '''
 
 import openpyxl
@@ -178,7 +172,6 @@ if __name__ == "__main__":
     
     
     qb_model = linear_model.LinearRegression()
-    
     qb_model.fit(qb_X_train, qb_Y_train)
     qb_Y_pred = qb_model.predict(qb_X_test)
     
@@ -188,6 +181,30 @@ if __name__ == "__main__":
     # Explained variance score: 1 is perfect prediction
     print('Variance score: %.2f' % r2_score(qb_Y_test, qb_Y_pred))
         
+    
+    plt.scatter(qb_Y_test, qb_Y_pred)
+    plt.title("Model Results")
+    plt.xlabel("Actual scores")
+    plt.ylabel("Predicted scores")
+    plt.show()
+
+    # Add more x variables to improve accuracy (i.e. height and weight, missed games?, injuries?)
+    # Maybe increase sliding window to improve accuracy? (maybe window of 5)
+    # 
+    #
+    # How reliable is this player to be within this score?    
+    #   probability of being above or below a certain score (boom or bust/true or false)
+    #       -- Logistic regression
+    #       -- Confusion matrix
+    #   how good is our prediction within 2 points of the actual (valiating model)
+    #   ex) I'm 80% certain that this player is going to get within __ points
+    # how often are our predctions too low/lower?
+    # our prediction vs espn's prediction and which one is better
+    # --> future: recording predicted values each week of the players to compare our model vs espn
+    #
+    
+    
+    
     
     #new ML prediction code
     # getting error for "continuous value" - I think a type is off in data
@@ -219,21 +236,6 @@ if __name__ == "__main__":
     print(confusion_matrix(qb_Y_test, predictions))
     print(classification_report(qb_Y_test, predictions))
     '''
-    
-    '''
-    This link to do calculations: https://www.dataquest.io/blog/machine-learning-tutorial/
-    go to sci-kit learn part near bottom
-    
-    '''
-    
-    '''
-    data.plot(x='pass_yds', y='fantasy points', style='o')
-    plt.show()
-    '''
-    
-    # list of all the data values (no column names), EXCLUDING fantasy points
-    #X = data.drop(columns=["fantasy points"]).values
-    
     
     
     

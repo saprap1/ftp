@@ -1,5 +1,5 @@
 # TO DO LIST
-* Add more x variables to improve accuracy (i.e. height and weight, missed games?, injuries?)
+* Add more x variables to improve accuracy (i.e. height and weight, missed games?, injuries?, pre-season rank of defense?, remove players with less than certain points or snaps?, played in last three consecutive games?)
 * Maybe increase sliding window to improve accuracy? (maybe window of 5)
 
 

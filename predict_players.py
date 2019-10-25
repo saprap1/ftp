@@ -178,6 +178,59 @@ if __name__ == "__main__":
         
     plt.scatter(qb_Y_test, qb_Y_pred)
     plt.title("QB Model Results")
+
+    plt.xlabel("Actual scores")
+    plt.ylabel("Predicted scores")
+    plt.show()
+    
+    print("--------------------- MODEL FOR WR ---------------------")    
+    wr_model = linear_model.LinearRegression()
+    wr_model.fit(wr_X_train, wr_Y_train)
+    wr_Y_pred = wr_model.predict(wr_X_test)
+    
+    # The mean squared error
+    print("Mean squared error: %.2f"
+          % mean_squared_error(wr_Y_test, wr_Y_pred))
+    # Explained variance score: 1 is perfect prediction
+    print('Variance score: %.2f' % r2_score(wr_Y_test, wr_Y_pred))
+        
+    plt.scatter(wr_Y_test, wr_Y_pred)
+    plt.title("WR Model Results")
+    plt.xlabel("Actual scores")
+    plt.ylabel("Predicted scores")
+    plt.show()
+    
+    print("--------------------- MODEL FOR RB ---------------------")    
+    rb_model = linear_model.LinearRegression()
+    rb_model.fit(rb_X_train, rb_Y_train)
+    rb_Y_pred = rb_model.predict(rb_X_test)
+    
+    # The mean squared error
+    print("Mean squared error: %.2f"
+          % mean_squared_error(rb_Y_test, rb_Y_pred))
+    # Explained variance score: 1 is perfect prediction
+    print('Variance score: %.2f' % r2_score(rb_Y_test, rb_Y_pred))
+        
+    plt.scatter(rb_Y_test, rb_Y_pred)
+    plt.title("RB Model Results")
+    plt.xlabel("Actual scores")
+    plt.ylabel("Predicted scores")
+    plt.show()
+    
+    print("--------------------- MODEL FOR TE ---------------------")    
+    te_model = linear_model.LinearRegression()
+    te_model.fit(te_X_train, te_Y_train)
+    te_Y_pred = te_model.predict(te_X_test)
+    
+    # The mean squared error
+    print("Mean squared error: %.2f"
+          % mean_squared_error(te_Y_test, te_Y_pred))
+    # Explained variance score: 1 is perfect prediction
+    print('Variance score: %.2f' % r2_score(te_Y_test, te_Y_pred))
+        
+    plt.scatter(te_Y_test, te_Y_pred)
+    plt.title("TE Model Results")
+
     plt.xlabel("Actual scores")
     plt.ylabel("Predicted scores")
     plt.show()

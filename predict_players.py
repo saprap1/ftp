@@ -32,32 +32,27 @@ from sklearn.metrics import mean_squared_error, r2_score
 # go through each of the files in that specific year, return X data and Y data
 def collect_data(files):
     
-    
     X_return = []       # X values to get returned
     X_collect = []      # Collect several games into one list
     Y = []              # Fantasy points
     
-    # testing on Tom Brady :|
-    #file = "2017_data/Tom_Brady_QB_2017.xlsx"
-    
     for file in files:
         # define the sliding window
+        # I've tried a window of [0,1,2,3] and [0,1,2,3,4]
+        # first option does better (lowers error but raises variance) for TE
+        # second does better for QB and WR
+        # RB stays the same
         window = [0, 1, 2, 3]
         data = pd.read_excel(file, index_col=0)
         games = data.values
         num_games = len(games)
         
-        #print("reading...", file)
-        
-        
-        #isCollecting = True
         # gather all the data from this one file into X_return and Y
         while True:
             X_collect = []
             
             # No more games to check, exit loop
             if window[-1] >= num_games:
-                #print("New X", X_return)
                 break;
             
             for i in window:
@@ -170,7 +165,7 @@ if __name__ == "__main__":
     #print(len(qb_Y_train), qb_Y_train)
     #print(len(qb_Y_test), qb_Y_test)
     
-    
+    print("--------------------- MODEL FOR QB ---------------------")    
     qb_model = linear_model.LinearRegression()
     qb_model.fit(qb_X_train, qb_Y_train)
     qb_Y_pred = qb_model.predict(qb_X_test)
@@ -181,9 +176,59 @@ if __name__ == "__main__":
     # Explained variance score: 1 is perfect prediction
     print('Variance score: %.2f' % r2_score(qb_Y_test, qb_Y_pred))
         
-    
     plt.scatter(qb_Y_test, qb_Y_pred)
-    plt.title("Model Results")
+    plt.title("QB Model Results")
+    plt.xlabel("Actual scores")
+    plt.ylabel("Predicted scores")
+    plt.show()
+    
+    print("--------------------- MODEL FOR WR ---------------------")    
+    wr_model = linear_model.LinearRegression()
+    wr_model.fit(wr_X_train, wr_Y_train)
+    wr_Y_pred = wr_model.predict(wr_X_test)
+    
+    # The mean squared error
+    print("Mean squared error: %.2f"
+          % mean_squared_error(wr_Y_test, wr_Y_pred))
+    # Explained variance score: 1 is perfect prediction
+    print('Variance score: %.2f' % r2_score(wr_Y_test, wr_Y_pred))
+        
+    plt.scatter(wr_Y_test, wr_Y_pred)
+    plt.title("WR Model Results")
+    plt.xlabel("Actual scores")
+    plt.ylabel("Predicted scores")
+    plt.show()
+    
+    print("--------------------- MODEL FOR RB ---------------------")    
+    rb_model = linear_model.LinearRegression()
+    rb_model.fit(rb_X_train, rb_Y_train)
+    rb_Y_pred = rb_model.predict(rb_X_test)
+    
+    # The mean squared error
+    print("Mean squared error: %.2f"
+          % mean_squared_error(rb_Y_test, rb_Y_pred))
+    # Explained variance score: 1 is perfect prediction
+    print('Variance score: %.2f' % r2_score(rb_Y_test, rb_Y_pred))
+        
+    plt.scatter(rb_Y_test, rb_Y_pred)
+    plt.title("RB Model Results")
+    plt.xlabel("Actual scores")
+    plt.ylabel("Predicted scores")
+    plt.show()
+    
+    print("--------------------- MODEL FOR TE ---------------------")    
+    te_model = linear_model.LinearRegression()
+    te_model.fit(te_X_train, te_Y_train)
+    te_Y_pred = te_model.predict(te_X_test)
+    
+    # The mean squared error
+    print("Mean squared error: %.2f"
+          % mean_squared_error(te_Y_test, te_Y_pred))
+    # Explained variance score: 1 is perfect prediction
+    print('Variance score: %.2f' % r2_score(te_Y_test, te_Y_pred))
+        
+    plt.scatter(te_Y_test, te_Y_pred)
+    plt.title("TE Model Results")
     plt.xlabel("Actual scores")
     plt.ylabel("Predicted scores")
     plt.show()
@@ -235,40 +280,4 @@ if __name__ == "__main__":
     # our prediction vs espn's prediction and which one is better
     # --> future: recording predicted values each week of the players to compare our model vs espn
     #
-    
-    
-    
-    
-    #new ML prediction code
-    # getting error for "continuous value" - I think a type is off in data
-    #ValueError: Unknown label type: 'continuous'
-    
-    # i think this has to do with the fact that we can't really use classifiers
-    # to predict the number of points a player will get
-    
-    #rf = RandomForestClassifier(n_estimators=100)
-    '''
-    print("QB X Train")
-    print(qb_X_train)
-    print()
-    print("QB Y Train")
-    print(qb_Y_train)
-    '''
-    '''
-    rf.fit(qb_X_train, qb_Y_train)
-    print("fit data complete")
-    predictions = rf.predict(qb_X_test) 
-    print("predictions complete")
-    #print(predictions)
-    y_predict_probabilities = rf.predict_proba(qb_X_test)[:,1]
-    print(y_predict_probabilities)
-    
-    
-    #print all results
-    print(accuracy_score(qb_Y_test, predictions))
-    print(confusion_matrix(qb_Y_test, predictions))
-    print(classification_report(qb_Y_test, predictions))
-    '''
-    
-    
     

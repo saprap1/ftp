@@ -187,7 +187,40 @@ if __name__ == "__main__":
     plt.xlabel("Actual scores")
     plt.ylabel("Predicted scores")
     plt.show()
-
+    
+    arrClass = []
+    for i in range (0, len(qb_Y_pred)):
+        if (abs(qb_Y_pred[i]-qb_Y_test[i])<=5):
+            arrClass.append("T")
+        else:
+            arrClass.append("F")
+            
+            
+    #splitNum = len(arrClass//2)
+    
+    xTrain = qb_X_test[:200]
+    xTest = qb_X_test[200:]
+    
+    yTrain = arrClass[:200]
+    yTest = arrClass[200:]
+    
+    qb_model2 = RandomForestClassifier(n_estimators=100)
+    qb_model2.fit(xTrain, yTrain)
+    qb_Y_pred2 = qb_model2.predict(xTest)
+    
+    
+    '''
+    #rf = RandomForestClassifier(n_estimators=100)
+    qb_model2 = RandomForestClassifier(n_estimators=100)
+    qb_model2.fit(qb_X_test, arrClass)
+    qb_Y_pred2 = qb_model2.predict(qb_X_test)
+    print(qb_Y_pred2)
+    '''
+    
+    print(accuracy_score(yTest, qb_Y_pred2))
+    print(confusion_matrix(yTest, qb_Y_pred2))
+    print(classification_report(yTest, qb_Y_pred2))
+    
     # Add more x variables to improve accuracy (i.e. height and weight, missed games?, injuries?)
     # Maybe increase sliding window to improve accuracy? (maybe window of 5)
     # 

@@ -1,6 +1,6 @@
 > Usage `python3 getData.py`
 
-#To do list
+# To do list
 
 1. Have spreadsheets all set with data displayed correctly
 2. For ML, make 2017 the training data, and 2018 the test data
@@ -34,13 +34,13 @@
 ```
 7. Problem I see arising could be that it is predicting categories instead of how many points. My honors project was categories and this will need to be points so that is something to look into.
 
-#Next Steps
+# Next Steps
 1. Add kicker data into all_players spreadsheet
 2. For RB add rush attempts, Y/A, targets, receptions, Y/R
 3. For WR and TE add targets, reception, Y/R
 4. For QB add Y/A and AY/A
 
-#Future
+# Future
 1. Add defense ranking each week
 2. Add espn projected point
 3. Run ML and compare our prediction vs espn

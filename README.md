@@ -33,3 +33,14 @@
 
 ```
 7. Problem I see arising could be that it is predicting categories instead of how many points. My honors project was categories and this will need to be points so that is something to look into.
+
+#Next Steps
+1. Add kicker data into all_players spreadsheet
+2. For RB add rush attempts, Y/A, targets, receptions, Y/R
+3. For WR and TE add targets, reception, Y/R
+4. For QB add Y/A and AY/A
+
+#Future
+1. Add defense ranking each week
+2. Add espn projected point
+3. Run ML and compare our prediction vs espn

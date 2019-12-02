@@ -80,6 +80,7 @@ def load_data(year):
 
         
         ########################more debug stuff#######################
+<<<<<<< HEAD
         #link = "https://www.pro-football-reference.com/players/G/GronRo00/gamelog/2018/"
         #firstName = "Rob"
         #lastName = "Gronkowski"
@@ -87,6 +88,11 @@ def load_data(year):
         # link = "https://www.pro-football-reference.com/players/B/BarkSa00/gamelog/2018"
         # firstName = "Saquon"
         # lastName = "Barkley"
+=======
+        link = "https://www.pro-football-reference.com/players/G/GronRo00/gamelog/2018/"
+        firstName = "Rob"
+        lastName = "Gronkowski"
+>>>>>>> machine-learning
 
         # link = "https://www.pro-football-reference.com/players/W/WalkHu00/gamelog/2018/"
         # firstName = "Delanie"
@@ -144,6 +150,7 @@ def load_data(year):
 
         data = []
         
+<<<<<<< HEAD
         # If the player has played fewer than 5 games, we'll skip them
         if (len(row) < 5):
             print("skipping data collection for " + firstName + " " + lastName + "... (played fewer than 5 games)")
@@ -160,6 +167,9 @@ def load_data(year):
         weight = float(weight[:-2])     # remove the last "lb" part of the string and convert to a float
 
         #print(len(row), "games recorded for", year, "for player:", firstName, lastName)
+=======
+        print(len(row), "games recorded for", year)
+>>>>>>> machine-learning
         
         for x in row:
             data_append = []

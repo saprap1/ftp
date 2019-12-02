@@ -13,6 +13,7 @@ import random
 import numpy as np
 import matplotlib.pyplot as plt
 import random
+import sys
 
 from sklearn import model_selection
 from sklearn.metrics import roc_auc_score, auc, roc_curve
@@ -80,7 +81,7 @@ Takes in the year that we are going to look into and the lists for the filenames
 by position. We take in the lists so we can add to them and return them instead
 of making copies/trying to append sets of lists together/etc.
 '''
-def organize_players(year, qb_files, wr_files, rb_files, te_files):
+def organize_players(year, qb_files, wr_files, rb_files, te_files, k_files):
     directory_str = year + "_data/"
     directory = os.fsencode(directory_str)
     for file in os.listdir(directory):
@@ -94,8 +95,10 @@ def organize_players(year, qb_files, wr_files, rb_files, te_files):
             wr_files.append(directory_str + filename)
         elif "_TE_" in filename:
             te_files.append(directory_str + filename)
+        elif "_K_" in filename:
+            k_files.append(directory_str + filename)
             
-    return qb_files, wr_files, rb_files, te_files
+    return qb_files, wr_files, rb_files, te_files, k_files
 
 def split_data(files, training, testing):
     # for each player, call the helper function here
@@ -113,6 +116,7 @@ if __name__ == "__main__":
     wr_files = []
     rb_files = []
     te_files = []
+    k_files = []
     
     qb_train = []
     qb_test = []
@@ -122,21 +126,25 @@ if __name__ == "__main__":
     rb_test = []
     te_train = []
     te_test = []
-    
+    k_train = []
+    k_test = []
     
     # get all the 2017 files
-    qb_files, wr_files, rb_files, te_files = organize_players("2017", qb_files, wr_files, rb_files, te_files)
+    qb_files, wr_files, rb_files, te_files, k_files = organize_players("2017", qb_files, wr_files, rb_files, te_files, k_files)
     qb_train, qb_test = split_data(qb_files, qb_train, qb_test)
     wr_train, wr_test = split_data(wr_files, wr_train, wr_test)
     rb_train, rb_test = split_data(rb_files, rb_train, rb_test)
     te_train, te_test = split_data(te_files, te_train, te_test)
+    k_train, k_test = split_data(k_files, k_train, k_test)
     
     # get all the 2018 files
-    qb_files, wr_files, rb_files, te_files = organize_players("2018", qb_files, wr_files, rb_files, te_files)
+    qb_files, wr_files, rb_files, te_files, k_files = organize_players("2018", qb_files, wr_files, rb_files, te_files, k_files)
     qb_train, qb_test = split_data(qb_files, qb_train, qb_test)
     wr_train, wr_test = split_data(wr_files, wr_train, wr_test)
     rb_train, rb_test = split_data(rb_files, rb_train, rb_test)
     te_train, te_test = split_data(te_files, te_train, te_test)
+    k_train, k_test = split_data(k_files, k_train, k_test)
+
     
     #print(qb_files)
     #print(wr_files)
@@ -155,12 +163,17 @@ if __name__ == "__main__":
     rb_X_test, rb_Y_test = collect_data(rb_test)
     te_X_train, te_Y_train = collect_data(te_train)
     te_X_test, te_Y_test = collect_data(te_test)
+    k_X_train, k_Y_train = collect_data(k_train)
+    k_X_test, k_Y_test = collect_data(k_test)
     
     # Sanity check to make sure all the training sets are the same length and all the testing sets are the same length!
     print("QB Train", len(qb_X_train), len(qb_Y_train), "QB Test", len(qb_X_test), len(qb_Y_test))
     print("WR Train", len(wr_X_train), len(wr_Y_train), "WR Test", len(wr_X_test), len(wr_Y_test))
     print("RB Train", len(rb_X_train), len(rb_Y_train), "RB Test", len(rb_X_test), len(rb_Y_test))
     print("TE Train", len(te_X_train), len(te_Y_train), "TE Test", len(te_X_test), len(te_Y_test))
+    print("K Train", len(k_X_train), len(k_Y_train), "K Test", len(k_X_test), len(k_Y_test))
+
+    #sys.exit(0)
     #print(len(qb_X_test), qb_X_test)
     #print(len(qb_Y_train), qb_Y_train)
     #print(len(qb_Y_test), qb_Y_test)

@@ -64,7 +64,7 @@ def load_data(year):
     row_count2 = sheet2.max_row
 
 
-    for i in range (2, row_count2+1):
+    for i in range (945, row_count2+1):
 
         position = sheet2.cell(row=i, column=2).value
         s = sheet2.cell(row=i, column=1).value
@@ -80,7 +80,6 @@ def load_data(year):
 
         
         ########################more debug stuff#######################
-<<<<<<< HEAD
         #link = "https://www.pro-football-reference.com/players/G/GronRo00/gamelog/2018/"
         #firstName = "Rob"
         #lastName = "Gronkowski"
@@ -88,11 +87,10 @@ def load_data(year):
         # link = "https://www.pro-football-reference.com/players/B/BarkSa00/gamelog/2018"
         # firstName = "Saquon"
         # lastName = "Barkley"
-=======
-        link = "https://www.pro-football-reference.com/players/G/GronRo00/gamelog/2018/"
-        firstName = "Rob"
-        lastName = "Gronkowski"
->>>>>>> machine-learning
+
+        #link = "https://www.pro-football-reference.com/players/G/GronRo00/gamelog/2018/"
+        #firstName = "Rob"
+        #lastName = "Gronkowski"
 
         # link = "https://www.pro-football-reference.com/players/W/WalkHu00/gamelog/2018/"
         # firstName = "Delanie"
@@ -128,8 +126,20 @@ def load_data(year):
             # Here, need to handle 2 cases..
             #   - either player is new and doesn't have 2018/2017 data
             #   - or player has a different version # due to sharing a URL
-            print("skipping data collection for " + firstName + " " + lastName + "... (no data available or wrong version)")
-            continue
+            try:
+                version = 2
+                fantasy_points = get_fant_points("https://www.pro-football-reference.com/players/" + lastName[0] + "/" + lastName[:4] + firstName[:2] + "0" + str(version), year)
+                tb = soup.find("tbody")
+                row = tb.findAll("tr")
+            except:
+                try:
+                    version = 3
+                    fantasy_points = get_fant_points("https://www.pro-football-reference.com/players/" + lastName[0] + "/" + lastName[:4] + firstName[:2] + "0" + str(version), year)
+                    tb = soup.find("tbody")
+                    row = tb.findAll("tr")
+                except:
+                    print("skipping data collection for " + firstName + " " + lastName + "... (no data available or wrong version)")
+                    continue
         
         # determine what features we want to focus on for each position
         features_wanted = []
@@ -150,7 +160,6 @@ def load_data(year):
 
         data = []
         
-<<<<<<< HEAD
         # If the player has played fewer than 5 games, we'll skip them
         if (len(row) < 5):
             print("skipping data collection for " + firstName + " " + lastName + "... (played fewer than 5 games)")
@@ -167,9 +176,7 @@ def load_data(year):
         weight = float(weight[:-2])     # remove the last "lb" part of the string and convert to a float
 
         #print(len(row), "games recorded for", year, "for player:", firstName, lastName)
-=======
         print(len(row), "games recorded for", year)
->>>>>>> machine-learning
         
         for x in row:
             data_append = []

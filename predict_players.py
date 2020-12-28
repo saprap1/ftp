@@ -6,7 +6,7 @@ Some resources:
     This link to do calculations: https://www.dataquest.io/blog/machine-learning-tutorial/
 '''
 
-import openpyxl
+import openpyxl as op
 import os
 import pandas as pd
 import random
@@ -29,8 +29,11 @@ from sklearn.svm import SVC
 from sklearn.ensemble import RandomForestClassifier
 from sklearn import datasets, linear_model
 from sklearn.metrics import mean_squared_error, r2_score
+from sklearn.linear_model import SGDRegressor
+from sklearn.preprocessing import StandardScaler
 
 # go through each of the files in that specific year, return X data and Y data
+# use a sliding window so that a few games will correspond to the following fantasy score
 def collect_data(files):
     
     X_return = []       # X values to get returned
@@ -44,8 +47,12 @@ def collect_data(files):
         # second does better for QB and WR
         # RB stays the same
         window = [0, 1, 2, 3]
-        data = pd.read_excel(file, index_col=0)
-        games = data.values
+
+        # get data from workbook
+        wb = op.load_workbook(file)
+        ws = wb['Sheet1']
+        data = pd.DataFrame(ws.values)
+        games = data.values[1:]
         num_games = len(games)
         
         # gather all the data from this one file into X_return and Y
@@ -145,6 +152,7 @@ if __name__ == "__main__":
     te_train, te_test = split_data(te_files, te_train, te_test)
     k_train, k_test = split_data(k_files, k_train, k_test)
 
+    print("done getting data")
     
     #print(qb_files)
     #print(wr_files)
@@ -166,17 +174,22 @@ if __name__ == "__main__":
     k_X_train, k_Y_train = collect_data(k_train)
     k_X_test, k_Y_test = collect_data(k_test)
     
+    print("done splitting data")
+
     # Sanity check to make sure all the training sets are the same length and all the testing sets are the same length!
+    '''
     print("QB Train", len(qb_X_train), len(qb_Y_train), "QB Test", len(qb_X_test), len(qb_Y_test))
     print("WR Train", len(wr_X_train), len(wr_Y_train), "WR Test", len(wr_X_test), len(wr_Y_test))
     print("RB Train", len(rb_X_train), len(rb_Y_train), "RB Test", len(rb_X_test), len(rb_Y_test))
     print("TE Train", len(te_X_train), len(te_Y_train), "TE Test", len(te_X_test), len(te_Y_test))
     print("K Train", len(k_X_train), len(k_Y_train), "K Test", len(k_X_test), len(k_Y_test))
-
+    '''
     #sys.exit(0)
     #print(len(qb_X_test), qb_X_test)
     #print(len(qb_Y_train), qb_Y_train)
     #print(len(qb_Y_test), qb_Y_test)
+    print(qb_X_train)
+    print("building models..")
     
     print("--------------------- MODEL FOR QB ---------------------")    
     qb_model = linear_model.LinearRegression()
@@ -332,6 +345,9 @@ if __name__ == "__main__":
     print(confusion_matrix(yTest, qb_Y_pred2))
     print(classification_report(yTest, qb_Y_pred2))
     
+
+    
+
     # Add more x variables to improve accuracy (i.e. height and weight, missed games?, injuries?)
     # Maybe increase sliding window to improve accuracy? (maybe window of 5)
     # 

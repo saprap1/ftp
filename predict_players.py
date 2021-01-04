@@ -31,6 +31,7 @@ from sklearn import datasets, linear_model
 from sklearn.metrics import mean_squared_error, r2_score
 from sklearn.linear_model import SGDRegressor
 from sklearn.preprocessing import StandardScaler
+from sklearn.pipeline import make_pipeline
 
 # go through each of the files in that specific year, return X data and Y data
 # use a sliding window so that a few games will correspond to the following fantasy score
@@ -61,7 +62,7 @@ def collect_data(files):
             
             # No more games to check, exit loop
             if window[-1] >= num_games:
-                break;
+                break
             
             for i in window:
                 one_game = list(games[i])
@@ -118,6 +119,8 @@ def split_data(files, training, testing):
 
 if __name__ == "__main__":
     
+    print("Running program... Retrieving files...")
+
     # need to initialize these because they are added to in the functions
     qb_files = []
     wr_files = []
@@ -152,7 +155,7 @@ if __name__ == "__main__":
     te_train, te_test = split_data(te_files, te_train, te_test)
     k_train, k_test = split_data(k_files, k_train, k_test)
 
-    print("done getting data")
+    print("Done splitting files.")
     
     #print(qb_files)
     #print(wr_files)
@@ -163,6 +166,7 @@ if __name__ == "__main__":
     # 30% of data goes to X_test and Y_test
     #print(len(qb_train), qb_train)
     #print(len(qb_test), qb_test)
+    print("Collecting data for each position...")
     qb_X_train, qb_Y_train = collect_data(qb_train)
     qb_X_test, qb_Y_test = collect_data(qb_test)
     wr_X_train, wr_Y_train = collect_data(wr_train)
@@ -174,7 +178,7 @@ if __name__ == "__main__":
     k_X_train, k_Y_train = collect_data(k_train)
     k_X_test, k_Y_test = collect_data(k_test)
     
-    print("done splitting data")
+    print("Done splitting data for each position.")
 
     # Sanity check to make sure all the training sets are the same length and all the testing sets are the same length!
     '''
@@ -188,166 +192,118 @@ if __name__ == "__main__":
     #print(len(qb_X_test), qb_X_test)
     #print(len(qb_Y_train), qb_Y_train)
     #print(len(qb_Y_test), qb_Y_test)
-    print(qb_X_train)
-    print("building models..")
     
-    print("--------------------- MODEL FOR QB ---------------------")    
-    qb_model = linear_model.LinearRegression()
-    qb_model.fit(qb_X_train, qb_Y_train)
-    qb_Y_pred = qb_model.predict(qb_X_test)
-    
-    # The mean squared error
-    print("Mean squared error: %.2f"
-          % mean_squared_error(qb_Y_test, qb_Y_pred))
-    # Explained variance score: 1 is perfect prediction
-    print('Variance score: %.2f' % r2_score(qb_Y_test, qb_Y_pred))
+    while True:
+        response = input("Which model would you like to build? <linear_regression, random_forest, sgd> <QB, WR, RB, TE, K> \nType quit to cancel.\n> ")
         
-    plt.scatter(qb_Y_test, qb_Y_pred)
-    plt.title("QB Model Results")
-
-    plt.xlabel("Actual scores")
-    plt.ylabel("Predicted scores")
-    plt.show()
-    
-    print("--------------------- MODEL FOR WR ---------------------")    
-    wr_model = linear_model.LinearRegression()
-    wr_model.fit(wr_X_train, wr_Y_train)
-    wr_Y_pred = wr_model.predict(wr_X_test)
-    
-    # The mean squared error
-    print("Mean squared error: %.2f"
-          % mean_squared_error(wr_Y_test, wr_Y_pred))
-    # Explained variance score: 1 is perfect prediction
-    print('Variance score: %.2f' % r2_score(wr_Y_test, wr_Y_pred))
-        
-    plt.scatter(wr_Y_test, wr_Y_pred)
-    plt.title("WR Model Results")
-    plt.xlabel("Actual scores")
-    plt.ylabel("Predicted scores")
-    plt.show()
-    
-    print("--------------------- MODEL FOR RB ---------------------")    
-    rb_model = linear_model.LinearRegression()
-    rb_model.fit(rb_X_train, rb_Y_train)
-    rb_Y_pred = rb_model.predict(rb_X_test)
-    
-    # The mean squared error
-    print("Mean squared error: %.2f"
-          % mean_squared_error(rb_Y_test, rb_Y_pred))
-    # Explained variance score: 1 is perfect prediction
-    print('Variance score: %.2f' % r2_score(rb_Y_test, rb_Y_pred))
-        
-    plt.scatter(rb_Y_test, rb_Y_pred)
-    plt.title("RB Model Results")
-    plt.xlabel("Actual scores")
-    plt.ylabel("Predicted scores")
-    plt.show()
-    
-    print("--------------------- MODEL FOR TE ---------------------")    
-    te_model = linear_model.LinearRegression()
-    te_model.fit(te_X_train, te_Y_train)
-    te_Y_pred = te_model.predict(te_X_test)
-    
-    # The mean squared error
-    print("Mean squared error: %.2f"
-          % mean_squared_error(te_Y_test, te_Y_pred))
-    # Explained variance score: 1 is perfect prediction
-    print('Variance score: %.2f' % r2_score(te_Y_test, te_Y_pred))
-        
-    plt.scatter(te_Y_test, te_Y_pred)
-    plt.title("TE Model Results")
-
-    plt.xlabel("Actual scores")
-    plt.ylabel("Predicted scores")
-    plt.show()
-    
-    print("--------------------- MODEL FOR WR ---------------------")    
-    wr_model = linear_model.LinearRegression()
-    wr_model.fit(wr_X_train, wr_Y_train)
-    wr_Y_pred = wr_model.predict(wr_X_test)
-    
-    # The mean squared error
-    print("Mean squared error: %.2f"
-          % mean_squared_error(wr_Y_test, wr_Y_pred))
-    # Explained variance score: 1 is perfect prediction
-    print('Variance score: %.2f' % r2_score(wr_Y_test, wr_Y_pred))
-        
-    plt.scatter(wr_Y_test, wr_Y_pred)
-    plt.title("WR Model Results")
-    plt.xlabel("Actual scores")
-    plt.ylabel("Predicted scores")
-    plt.show()
-    
-    print("--------------------- MODEL FOR RB ---------------------")    
-    rb_model = linear_model.LinearRegression()
-    rb_model.fit(rb_X_train, rb_Y_train)
-    rb_Y_pred = rb_model.predict(rb_X_test)
-    
-    # The mean squared error
-    print("Mean squared error: %.2f"
-          % mean_squared_error(rb_Y_test, rb_Y_pred))
-    # Explained variance score: 1 is perfect prediction
-    print('Variance score: %.2f' % r2_score(rb_Y_test, rb_Y_pred))
-        
-    plt.scatter(rb_Y_test, rb_Y_pred)
-    plt.title("RB Model Results")
-    plt.xlabel("Actual scores")
-    plt.ylabel("Predicted scores")
-    plt.show()
-    
-    print("--------------------- MODEL FOR TE ---------------------")    
-    te_model = linear_model.LinearRegression()
-    te_model.fit(te_X_train, te_Y_train)
-    te_Y_pred = te_model.predict(te_X_test)
-    
-    # The mean squared error
-    print("Mean squared error: %.2f"
-          % mean_squared_error(te_Y_test, te_Y_pred))
-    # Explained variance score: 1 is perfect prediction
-    print('Variance score: %.2f' % r2_score(te_Y_test, te_Y_pred))
-        
-    plt.scatter(te_Y_test, te_Y_pred)
-    plt.title("TE Model Results")
-    plt.xlabel("Actual scores")
-    plt.ylabel("Predicted scores")
-    plt.show()
-    
-    arrClass = []
-    for i in range (0, len(qb_Y_pred)):
-        if (abs(qb_Y_pred[i]-qb_Y_test[i])<=5):
-            arrClass.append("T")
+        if response == 'quit':
+            break
         else:
-            arrClass.append("F")
+            response = response.split(" ")
+            model_type = response[0]
+            pos = response[1]
+            x_train, y_train, x_test, y_test = [], [], [], []
+            if pos.lower() == 'qb':
+                x_train = qb_X_train
+                y_train = qb_Y_train
+                x_test = qb_X_test
+                y_test = qb_Y_test
+            elif pos.lower() == 'wr':
+                x_train = wr_X_train
+                y_train = wr_Y_train
+                x_test = wr_X_test
+                y_test = wr_Y_test
+            elif pos.lower() == 'rb':
+                x_train = rb_X_train
+                y_train = rb_Y_train
+                x_test = rb_X_test
+                y_test = rb_Y_test
+            elif pos.lower() == 'te':
+                x_train = te_X_train
+                y_train = te_Y_train
+                x_test = te_X_test
+                y_test = te_Y_test
+            elif pos.lower() == 'k':
+                x_train = k_X_train
+                y_train = k_Y_train
+                x_test = k_X_test
+                y_test = k_Y_test
+            else:
+                print("Position does not exist.")
+                continue
             
-            
-    #splitNum = len(arrClass//2)
-    
-    xTrain = qb_X_test[:200]
-    xTest = qb_X_test[200:]
-    
-    yTrain = arrClass[:200]
-    yTest = arrClass[200:]
-    
-    qb_model2 = RandomForestClassifier(n_estimators=100)
-    qb_model2.fit(xTrain, yTrain)
-    qb_Y_pred2 = qb_model2.predict(xTest)
-    
-    
-    '''
-    #rf = RandomForestClassifier(n_estimators=100)
-    qb_model2 = RandomForestClassifier(n_estimators=100)
-    qb_model2.fit(qb_X_test, arrClass)
-    qb_Y_pred2 = qb_model2.predict(qb_X_test)
-    print(qb_Y_pred2)
-    '''
-    
-    print(accuracy_score(yTest, qb_Y_pred2))
-    print(confusion_matrix(yTest, qb_Y_pred2))
-    print(classification_report(yTest, qb_Y_pred2))
-    
+            if model_type == "linear_regression":
+                print("-------------------Linear Regression Model for {}-------------------".format(pos.upper()))
+                model = linear_model.LinearRegression()
+                model.fit(x_train, y_train)
+                y_pred = model.predict(x_test)
+                # The mean squared error
+                print("\tMean squared error: %.2f"
+                    % mean_squared_error(y_test, y_pred))
+                # Explained variance score: 1 is perfect prediction
+                print('\tVariance score: %.2f' % r2_score(y_test, y_pred))
+                plt.scatter(y_test, y_pred)
+                plt.title("{} Model Results".format(pos.upper()))
+                plt.xlabel("Actual scores")
+                plt.ylabel("Predicted scores")
+                plt.show()
+            elif model_type == "random_forest":
+                print("-------------------Random Forest Model for {}-------------------".format(pos.upper()))
+                # rf = RandomForestClassifier(n_estimators=100)
+                # rf.fit(x_train, y_train)
+                # y_pred = rf.predict(x_test)
+                # print(accuracy_score(y_test, y_pred))
+                # print(classification_report(y_test, y_pred))
+            elif model_type == "sgd":
+                print("-------------------SGD Regressor Model for {}-------------------".format(pos.upper()))
+                # default ordinary least squares loss with l2 regularization
+                # start with 100 epochs
+                # can also try learning_rate='optimal'
+                #sgd_model = SGDRegressor(max_iter=100, learning_rate='adaptive')
+                sgd_model = SGDRegressor()
+                
+                # use a pipeline to keep track of transforms; be sure to scale data
+                #pl = make_pipeline(StandardScaler(), sgd_model)
+                #pl.fit(x_train, y_train)
+                sgd_model.fit(x_train, y_train)
+                print(sgd_model.score(x_test, y_test))
 
-    
 
+
+'''   
+        arrClass = []
+        for i in range (0, len(qb_Y_pred)):
+            if (abs(qb_Y_pred[i]-qb_Y_test[i])<=5):
+                arrClass.append("T")
+            else:
+                arrClass.append("F")
+                
+                
+        #splitNum = len(arrClass//2)
+        
+        xTrain = qb_X_test[:200]
+        xTest = qb_X_test[200:]
+        
+        yTrain = arrClass[:200]
+        yTest = arrClass[200:]
+        
+        qb_model2 = RandomForestClassifier(n_estimators=100)
+        qb_model2.fit(xTrain, yTrain)
+        qb_Y_pred2 = qb_model2.predict(xTest)
+
+        
+        
+        #rf = RandomForestClassifier(n_estimators=100)
+        qb_model2 = RandomForestClassifier(n_estimators=100)
+        qb_model2.fit(qb_X_test, arrClass)
+        qb_Y_pred2 = qb_model2.predict(qb_X_test)
+        print(qb_Y_pred2)
+        
+
+        print(accuracy_score(yTest, qb_Y_pred2))
+        #print(confusion_matrix(yTest, qb_Y_pred2))
+        print(classification_report(yTest, qb_Y_pred2))
+'''
     # Add more x variables to improve accuracy (i.e. height and weight, missed games?, injuries?)
     # Maybe increase sliding window to improve accuracy? (maybe window of 5)
     # 

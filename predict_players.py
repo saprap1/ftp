@@ -32,6 +32,7 @@ from sklearn.metrics import mean_squared_error, r2_score
 from sklearn.linear_model import SGDRegressor
 from sklearn.preprocessing import StandardScaler
 from sklearn.pipeline import make_pipeline
+from sklearn.model_selection import cross_val_score
 
 # go through each of the files in that specific year, return X data and Y data
 # use a sliding window so that a few games will correspond to the following fantasy score
@@ -193,8 +194,11 @@ if __name__ == "__main__":
     #print(len(qb_Y_train), qb_Y_train)
     #print(len(qb_Y_test), qb_Y_test)
     
+    # accumulate a list of the models we make so we can compare at the end(?)
+    models = []
+
     while True:
-        response = input("Which model would you like to build? <linear_regression, random_forest, sgd> <QB, WR, RB, TE, K> \nType quit to cancel.\n> ")
+        response = input("Which model would you like to build? <linear_regression, sgd> <QB, WR, RB, TE, K> \nType quit to cancel.\n> ")
         
         if response == 'quit':
             break
@@ -202,7 +206,7 @@ if __name__ == "__main__":
             response = response.split(" ")
             model_type = response[0]
             pos = response[1]
-            x_train, y_train, x_test, y_test = [], [], [], []
+            x_train, y_train, x_test, y_test, y_pred = [], [], [], [], []
             if pos.lower() == 'qb':
                 x_train = qb_X_train
                 y_train = qb_Y_train
@@ -242,18 +246,19 @@ if __name__ == "__main__":
                     % mean_squared_error(y_test, y_pred))
                 # Explained variance score: 1 is perfect prediction
                 print('\tVariance score: %.2f' % r2_score(y_test, y_pred))
+                
+
                 plt.scatter(y_test, y_pred)
                 plt.title("{} Model Results".format(pos.upper()))
                 plt.xlabel("Actual scores")
                 plt.ylabel("Predicted scores")
                 plt.show()
-            elif model_type == "random_forest":
-                print("-------------------Random Forest Model for {}-------------------".format(pos.upper()))
-                # rf = RandomForestClassifier(n_estimators=100)
-                # rf.fit(x_train, y_train)
-                # y_pred = rf.predict(x_test)
-                # print(accuracy_score(y_test, y_pred))
-                # print(classification_report(y_test, y_pred))
+
+                # k-fold cross validation
+                k = 10   # number of folds
+                cv_scores = cross_val_score(model, x_test, y_test, cv=k)
+                print("\tCross validation score, k={}, accuracy is {:.2f}, standard deviation is {:.2f}".format(k, cv_scores.mean(), cv_scores.std()))
+
             elif model_type == "sgd":
                 print("-------------------SGD Regressor Model for {}-------------------".format(pos.upper()))
                 # default ordinary least squares loss with l2 regularization
@@ -266,9 +271,34 @@ if __name__ == "__main__":
                 #pl = make_pipeline(StandardScaler(), sgd_model)
                 #pl.fit(x_train, y_train)
                 sgd_model.fit(x_train, y_train)
+                y_pred = sgd_model.predict(x_test)
                 print(sgd_model.score(x_test, y_test))
+            
 
+            arrClass = []
+            for i in range (0, len(y_pred)):
+                if (abs(y_pred[i]-y_test[i])<=5):
+                    arrClass.append("T")
+                else:
+                    arrClass.append("F")
+                    
+            #splitNum = len(arrClass//2)
 
+            '''
+            xTrain = x_train[:200]
+            xTest = x_test[200:]
+            
+            yTrain = arrClass[:200]
+            yTest = arrClass[200:]
+            
+            rf_model = RandomForestClassifier(n_estimators=100)
+            rf_model.fit(xTrain, yTrain)
+            pred2 = rf_model.predict(xTest)
+
+            #print(accuracy_score(yTest, pred2))
+            #print(confusion_matrix(yTest, pred2))
+            print(classification_report(yTest, pred2))
+            '''
 
 '''   
         arrClass = []
@@ -301,7 +331,7 @@ if __name__ == "__main__":
         
 
         print(accuracy_score(yTest, qb_Y_pred2))
-        #print(confusion_matrix(yTest, qb_Y_pred2))
+        print(confusion_matrix(yTest, qb_Y_pred2))
         print(classification_report(yTest, qb_Y_pred2))
 '''
     # Add more x variables to improve accuracy (i.e. height and weight, missed games?, injuries?)

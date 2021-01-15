@@ -178,6 +178,8 @@ if __name__ == "__main__":
     te_X_test, te_Y_test = collect_data(te_test)
     k_X_train, k_Y_train = collect_data(k_train)
     k_X_test, k_Y_test = collect_data(k_test)
+
+    
     
     print("Done splitting data for each position.")
 
@@ -198,7 +200,7 @@ if __name__ == "__main__":
     models = []
 
     while True:
-        response = input("Which model would you like to build? <linear_regression, sgd> <QB, WR, RB, TE, K> \nType quit to cancel.\n> ")
+        response = input("Which model would you like to build? <linear_regression, sgd, ridge_regression> <QB, WR, RB, TE, K> \nType quit to cancel.\n> ")
         
         if response == 'quit':
             break
@@ -236,6 +238,12 @@ if __name__ == "__main__":
                 print("Position does not exist.")
                 continue
             
+            #xtrain_scaler = preprocessing.StandardScaler(with_mean=False).fit(X_train)
+            scaler = StandardScaler().fit(x_train)
+            x_train = scaler.transform(x_train)
+            x_test = scaler.transform(x_test)
+            
+
             if model_type == "linear_regression":
                 print("-------------------Linear Regression Model for {}-------------------".format(pos.upper()))
                 model = linear_model.LinearRegression()
@@ -253,12 +261,7 @@ if __name__ == "__main__":
                 plt.xlabel("Actual scores")
                 plt.ylabel("Predicted scores")
                 plt.show()
-
-                # k-fold cross validation
-                k = 10   # number of folds
-                cv_scores = cross_val_score(model, x_test, y_test, cv=k)
-                print("\tCross validation score, k={}, accuracy is {:.2f}, standard deviation is {:.2f}".format(k, cv_scores.mean(), cv_scores.std()))
-
+            
             elif model_type == "sgd":
                 print("-------------------SGD Regressor Model for {}-------------------".format(pos.upper()))
                 # default ordinary least squares loss with l2 regularization
@@ -274,6 +277,16 @@ if __name__ == "__main__":
                 y_pred = sgd_model.predict(x_test)
                 print(sgd_model.score(x_test, y_test))
             
+            elif model_type == "ridge_regression":
+                model = linear_model.Ridge(solver='svd')
+                model.fit(x_train, y_train)
+                y_pred = model.predict(x_test)
+                # The mean squared error
+                print("\tMean squared error: %.2f"
+                    % mean_squared_error(y_test, y_pred))
+                # Explained variance score: 1 is perfect prediction
+                print('\tVariance score: %.2f' % r2_score(y_test, y_pred))
+                
 
             arrClass = []
             for i in range (0, len(y_pred)):
@@ -284,7 +297,7 @@ if __name__ == "__main__":
                     
             #splitNum = len(arrClass//2)
 
-            '''
+            
             xTrain = x_train[:200]
             xTest = x_test[200:]
             
@@ -298,7 +311,7 @@ if __name__ == "__main__":
             #print(accuracy_score(yTest, pred2))
             #print(confusion_matrix(yTest, pred2))
             print(classification_report(yTest, pred2))
-            '''
+            
 
 '''   
         arrClass = []

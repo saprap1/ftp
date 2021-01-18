@@ -118,6 +118,13 @@ def split_data(files, training, testing):
     testing += files[train:]
     return training, testing
 
+def individual_data(files, training, testing, index):
+    #make all but 1 training set
+    testing = files[index]
+    files.remove[index]
+    
+    return files, testing
+
 if __name__ == "__main__":
     
     print("Running program... Retrieving files...")
@@ -139,6 +146,22 @@ if __name__ == "__main__":
     te_test = []
     k_train = []
     k_test = []
+    
+    '''
+    qbSet = {}
+    #get individual data
+    for i in range (0, len(qb_files)):
+        qb_train, qb_test = split_data(qb_files, qb_train, qb_test, i)
+        
+        qb_X_train, qb_Y_train = collect_data(qb_train)
+        qb_X_test, qb_Y_test = collect_data(qb_test)
+        
+        qbSet.add([])
+        
+        #then can run model 
+        #i think this computation time might be too much though
+        #curious if pandas has something that does this optimaly 
+    '''
     
     # get all the 2017 files
     qb_files, wr_files, rb_files, te_files, k_files = organize_players("2017", qb_files, wr_files, rb_files, te_files, k_files)
